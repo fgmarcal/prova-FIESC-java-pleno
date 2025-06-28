@@ -132,7 +132,7 @@ public class PessoaServiceImpl implements PessoaService {
         pessoa.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE.toString());
         pessoaRepository.save(pessoa);
 
-        pessoaIntegracaoProducer.enviarPessoaParaFila(dto);
+        this.integrarPessoa(dto);
         log.info("Integração reenviada manualmente para CPF {}", cpf);
     }
 
@@ -145,7 +145,7 @@ public class PessoaServiceImpl implements PessoaService {
             pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
                     dto.cpf(), SituacaoIntegracao.SUCESSO.toString(), "Pessoa atualizada com sucesso"
             ));
-        } catch (HttpClientErrorException.NotFound e) {
+        } catch (RuntimeException e) {
             try {
                 pessoaApiClient.criarPessoa(dto);
                 atualizarSituacao(dto.cpf(), SituacaoIntegracao.SUCESSO.toString());
