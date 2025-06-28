@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.fiesc.felipe.backend.modules.model.dto.*;
 import org.fiesc.felipe.backend.modules.model.entity.Endereco;
 import org.fiesc.felipe.backend.modules.model.entity.Pessoa;
+import org.fiesc.felipe.backend.modules.queue.PessoaProducer;
 import org.fiesc.felipe.backend.modules.repository.PessoaRepository;
 import org.fiesc.felipe.backend.modules.service.interfaces.EnderecoService;
 import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
@@ -22,6 +23,8 @@ public class PessoaServiceImpl implements PessoaService {
     private final PessoaRepository pessoaRepository;
     private final EnderecoService enderecoService;
     private final CorreiosIntegrationService correiosService;
+    private final PessoaProducer pessoaProducer;
+
 
     @Override
     @Transactional
@@ -50,9 +53,10 @@ public class PessoaServiceImpl implements PessoaService {
             }
         }
         pessoa.setEndereco(enderecoService.salvarOuAtualizar(enderecoDto, pessoa));
-        pessoa.setSituacaoIntegracao("Não enviado");
+        pessoa.setSituacaoIntegracao("Pendente");
 
         Pessoa pessoaSalva = pessoaRepository.save(pessoa);
+        pessoaProducer.enviarPessoaParaFila(dto);
 
         return new PessoaResponseDto(pessoaSalva.getIdPessoa(), "Pessoa cadastrada com sucesso");
     }
@@ -91,8 +95,6 @@ public class PessoaServiceImpl implements PessoaService {
                 .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
         return mapToDto(pessoa);
     }
-
-    // ===================== AUXILIARES ======================
 
     private void validarNome(String nome) {
         if (nome == null || nome.trim().split("\\s+").length < 2) {
