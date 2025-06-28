@@ -2,12 +2,14 @@ package org.fiesc.felipe.api.modules.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.fiesc.felipe.api.modules.model.dto.PessoaIntegracaoStatusDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
 import org.fiesc.felipe.api.modules.model.entity.Endereco;
 import org.fiesc.felipe.api.modules.model.entity.Pessoa;
+import org.fiesc.felipe.api.modules.model.enums.SituacaoIntegracao;
+import org.fiesc.felipe.api.modules.queue.producer.PessoaIntegracaoProducer;
 import org.fiesc.felipe.api.modules.repository.PessoaRepository;
-import org.fiesc.felipe.api.modules.repository.EnderecoRepository;
 import org.fiesc.felipe.api.modules.service.external.CorreiosIntegrationService;
 import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
 import org.springframework.stereotype.Service;
@@ -22,36 +24,29 @@ public class PessoaServiceImpl implements PessoaService {
 
     private final PessoaRepository pessoaRepository;
     private final CorreiosIntegrationService correiosIntegrationService;
+    private final PessoaIntegracaoProducer pessoaIntegracaoProducer;
 
     @Override
     @Transactional
     public void salvarPessoa(PessoaRequestDto dto) {
         if (dto == null || dto.cpf() == null) {
-            throw new RuntimeException("Pessoa inválida");
+            throw new RuntimeException("CPF da pessoa é obrigatório ou objeto inválido");
         }
 
         if (pessoaRepository.findByCpf(dto.cpf()).isPresent()) {
             throw new RuntimeException("CPF já cadastrado");
         }
 
-        validaCamposObrigatorios(dto);
+        validarCamposObrigatorios(dto);
 
         Pessoa pessoa = new Pessoa();
         pessoa.setNome(dto.nome());
         pessoa.setCpf(dto.cpf());
         pessoa.setEmail(dto.email());
 
-        LocalDate nascimento = LocalDate.parse(dto.dataNascimento());
-        if (nascimento.isAfter(LocalDate.now())) {
-            throw new RuntimeException("Data de nascimento não pode ser futura");
-        }
-        pessoa.setNascimento(nascimento);
+        validarDataNascimento(dto, pessoa);
 
-        // Validar CEP externo (via Correios)
-        EnderecoDto enderecoValido = correiosIntegrationService.buscarEnderecoPorCep(dto.endereco().cep());
-        if (enderecoValido == null) {
-            throw new RuntimeException("CEP inválido ou não encontrado");
-        }
+        EnderecoDto enderecoValido = getEnderecoValido(dto);
 
         Endereco endereco = new Endereco();
         endereco.setCep(enderecoValido.cep());
@@ -62,11 +57,37 @@ public class PessoaServiceImpl implements PessoaService {
 
         endereco.setPessoa(pessoa);
         pessoa.setEndereco(endereco);
-
+        try {
         pessoaRepository.save(pessoa);
+        pessoaIntegracaoProducer.enviarStatus(
+                new PessoaIntegracaoStatusDto(pessoa.getCpf(), SituacaoIntegracao.SUCESSO, "Pessoa salva com sucesso")
+        );
+        } catch (Exception e) {
+            log.error("Erro ao salvar pessoa: {}", e.getMessage(), e);
+            pessoaIntegracaoProducer.enviarStatus(
+                    new PessoaIntegracaoStatusDto(dto.cpf(), SituacaoIntegracao.ERRO, "Falha ao salvar pessoa: " + e.getMessage())
+            );
+            throw e;
+        }
     }
 
-    private void validaCamposObrigatorios(PessoaRequestDto dto) {
+    private void validarDataNascimento(PessoaRequestDto dto, Pessoa pessoa) {
+        LocalDate nascimento = LocalDate.parse(dto.dataNascimento());
+        if (nascimento.isAfter(LocalDate.now())) {
+            throw new RuntimeException("Data de nascimento não pode ser futura");
+        }
+        pessoa.setNascimento(nascimento);
+    }
+
+    private EnderecoDto getEnderecoValido(PessoaRequestDto dto) {
+        EnderecoDto enderecoValido = correiosIntegrationService.buscarEnderecoPorCep(dto.endereco().cep());
+        if (enderecoValido == null) {
+            throw new RuntimeException("CEP inválido ou não encontrado");
+        }
+        return enderecoValido;
+    }
+
+    private void validarCamposObrigatorios(PessoaRequestDto dto) {
         if (dto.nome() == null || dto.nome().isBlank() ||
                 dto.cpf() == null || dto.email() == null || dto.dataNascimento() == null ||
                 dto.endereco() == null ||

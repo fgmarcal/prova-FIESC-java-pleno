@@ -3,6 +3,8 @@ package org.fiesc.felipe.backend.modules.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
+
 import java.time.LocalDate;
 
 @Entity
@@ -30,5 +32,6 @@ public class Pessoa {
     @OneToOne(mappedBy = "pessoa", cascade = CascadeType.ALL)
     private Endereco endereco;
 
-    private String situacaoIntegracao;
+    @Enumerated(EnumType.STRING)
+    private SituacaoIntegracao situacaoIntegracao;
 }

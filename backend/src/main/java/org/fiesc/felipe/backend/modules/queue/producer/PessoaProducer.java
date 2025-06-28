@@ -1,4 +1,4 @@
-package org.fiesc.felipe.backend.modules.queue;
+package org.fiesc.felipe.backend.modules.queue.producer;
 
 import lombok.RequiredArgsConstructor;
 import org.fiesc.felipe.backend.config.RabbitMQConfig;

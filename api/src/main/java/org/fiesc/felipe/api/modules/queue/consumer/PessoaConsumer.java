@@ -1,4 +1,4 @@
-package org.fiesc.felipe.api.modules.consumer;
+package org.fiesc.felipe.api.modules.queue.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,11 +1,13 @@
 package org.fiesc.felipe.backend.modules.service.implementations;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.fiesc.felipe.backend.modules.model.dto.*;
-import org.fiesc.felipe.backend.modules.model.entity.Endereco;
 import org.fiesc.felipe.backend.modules.model.entity.Pessoa;
-import org.fiesc.felipe.backend.modules.queue.PessoaProducer;
+import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
+import org.fiesc.felipe.backend.modules.queue.producer.PessoaProducer;
 import org.fiesc.felipe.backend.modules.repository.PessoaRepository;
+import org.fiesc.felipe.backend.modules.service.external.PessoaApiClient;
 import org.fiesc.felipe.backend.modules.service.interfaces.EnderecoService;
 import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.fiesc.felipe.backend.modules.service.external.CorreiosIntegrationService;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PessoaServiceImpl implements PessoaService {
 
@@ -24,6 +27,8 @@ public class PessoaServiceImpl implements PessoaService {
     private final EnderecoService enderecoService;
     private final CorreiosIntegrationService correiosService;
     private final PessoaProducer pessoaProducer;
+    private final PessoaApiClient pessoaApiClient;
+
 
 
     @Override
@@ -53,10 +58,11 @@ public class PessoaServiceImpl implements PessoaService {
             }
         }
         pessoa.setEndereco(enderecoService.salvarOuAtualizar(enderecoDto, pessoa));
-        pessoa.setSituacaoIntegracao("Pendente");
+        pessoa.setSituacaoIntegracao(SituacaoIntegracao.NAO_ENVIADO);
 
         Pessoa pessoaSalva = pessoaRepository.save(pessoa);
         pessoaProducer.enviarPessoaParaFila(dto);
+        pessoa.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE);
 
         return new PessoaResponseDto(pessoaSalva.getIdPessoa(), "Pessoa cadastrada com sucesso");
     }
@@ -78,24 +84,25 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     public void remover(String cpf) {
-        if (!pessoaRepository.existsByCpf(cpf)) {
-            throw new RuntimeException("Pessoa não encontrada");
+        try {
+            pessoaApiClient.removerPessoa(cpf);
+
+            pessoaRepository.deleteByCpf(cpf);
+
+        } catch (Exception e) {
+            log.error("Erro ao remover CPF {} na API", cpf, e.getStackTrace());
+            throw new RuntimeException("Erro ao remover pessoa na API: " + e.getMessage(), e);
         }
-        pessoaRepository.deleteByCpf(cpf);
     }
 
     @Override
     public List<PessoaRequestDto> listarTodos() {
-        return pessoaRepository.findAll().stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+        return pessoaApiClient.listarTodas();
     }
 
     @Override
     public PessoaRequestDto consultarPorCpf(String cpf) {
-        Pessoa pessoa = pessoaRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
-        return mapToDto(pessoa);
+        return pessoaApiClient.consultarPessoaPorCpf(cpf);
     }
 
     private void validarNome(String nome) {
