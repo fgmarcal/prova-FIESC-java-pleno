@@ -2,6 +2,7 @@ package org.fiesc.felipe.backend.modules.service.external;
 
 import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaResponseDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,7 +12,8 @@ import java.util.List;
 @Component
 public class PessoaApiClient {
 
-    private final String apiBaseUrl = "http://localhost:8081";
+    @Value("${api.pessoa.base-url}")
+    private String apiBaseUrl;
     private final RestTemplate restTemplate = new RestTemplate();
 
 

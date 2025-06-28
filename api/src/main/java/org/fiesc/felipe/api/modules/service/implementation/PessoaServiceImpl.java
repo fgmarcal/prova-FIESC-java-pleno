@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fiesc.felipe.api.modules.model.dto.PessoaIntegracaoStatusDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
+import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
 import org.fiesc.felipe.api.modules.model.entity.Endereco;
 import org.fiesc.felipe.api.modules.model.entity.Pessoa;
 import org.fiesc.felipe.api.modules.model.enums.SituacaoIntegracao;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -69,6 +71,45 @@ public class PessoaServiceImpl implements PessoaService {
             );
             throw e;
         }
+    }
+
+    @Override
+    public List<PessoaRequestDto> listarTodos() {
+        return pessoaRepository.findAll().stream().map(this::mapToDto).toList();
+    }
+
+    @Override
+    public PessoaRequestDto consultarPorCpf(String cpf) {
+        Pessoa pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+        return mapToDto(pessoa);
+    }
+
+    @Override
+    @Transactional
+    public PessoaResponseDto removerPorCpf(String cpf) {
+        Pessoa pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+
+        pessoaRepository.delete(pessoa);
+        return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa removida com sucesso");
+    }
+
+    private PessoaRequestDto mapToDto(Pessoa pessoa) {
+        Endereco endereco = pessoa.getEndereco();
+        return new PessoaRequestDto(
+                pessoa.getNome(),
+                pessoa.getNascimento() != null ? pessoa.getNascimento().toString() : null,
+                pessoa.getCpf(),
+                pessoa.getEmail(),
+                new EnderecoDto(
+                        endereco.getCep(),
+                        endereco.getRua(),
+                        endereco.getNumero(),
+                        endereco.getCidade(),
+                        endereco.getEstado()
+                )
+        );
     }
 
     private void validarDataNascimento(PessoaRequestDto dto, Pessoa pessoa) {
