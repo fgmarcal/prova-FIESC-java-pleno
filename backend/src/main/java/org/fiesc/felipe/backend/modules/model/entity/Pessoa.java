@@ -32,6 +32,6 @@ public class Pessoa {
     @OneToOne(mappedBy = "pessoa", cascade = CascadeType.ALL)
     private Endereco endereco;
 
-    @Enumerated(EnumType.STRING)
-    private SituacaoIntegracao situacaoIntegracao;
+    @Column(name = "situacao_integracao", nullable = false)
+    private String situacaoIntegracao;
 }

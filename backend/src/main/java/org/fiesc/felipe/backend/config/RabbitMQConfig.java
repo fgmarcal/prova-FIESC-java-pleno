@@ -55,7 +55,7 @@ public class RabbitMQConfig {
         DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
         typeMapper.setTrustedPackages("*");
         typeMapper.setIdClassMapping(Map.of(
-                "org.fiesc.felipe.api.modules.model.dto.PessoaIntegracaoStatusDto", PessoaIntegracaoStatusDto.class
+                PessoaIntegracaoStatusDto.class.getName(), PessoaIntegracaoStatusDto.class
         ));
 
         converter.setJavaTypeMapper(typeMapper);

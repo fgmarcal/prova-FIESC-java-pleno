@@ -11,4 +11,6 @@ public interface PessoaService {
     void remover(String cpf);
     List<PessoaRequestDto> listarTodos();
     PessoaRequestDto consultarPorCpf(String cpf);
+    void reenviarIntegracao(String cpf);
+    void integrarPessoa(PessoaRequestDto dto);
 }

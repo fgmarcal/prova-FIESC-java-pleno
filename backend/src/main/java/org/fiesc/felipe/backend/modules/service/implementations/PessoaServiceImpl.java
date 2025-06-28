@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fiesc.felipe.backend.modules.model.dto.*;
 import org.fiesc.felipe.backend.modules.model.entity.Pessoa;
 import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
-import org.fiesc.felipe.backend.modules.queue.producer.PessoaProducer;
+import org.fiesc.felipe.backend.modules.queue.producer.PessoaIntegracaoProducer;
 import org.fiesc.felipe.backend.modules.repository.PessoaRepository;
 import org.fiesc.felipe.backend.modules.service.external.PessoaApiClient;
 import org.fiesc.felipe.backend.modules.service.interfaces.EnderecoService;
@@ -13,6 +13,7 @@ import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.fiesc.felipe.backend.modules.service.external.CorreiosIntegrationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,10 +27,8 @@ public class PessoaServiceImpl implements PessoaService {
     private final PessoaRepository pessoaRepository;
     private final EnderecoService enderecoService;
     private final CorreiosIntegrationService correiosService;
-    private final PessoaProducer pessoaProducer;
+    private final PessoaIntegracaoProducer pessoaIntegracaoProducer;
     private final PessoaApiClient pessoaApiClient;
-
-
 
     @Override
     @Transactional
@@ -57,12 +56,18 @@ public class PessoaServiceImpl implements PessoaService {
                 );
             }
         }
-        pessoa.setEndereco(enderecoService.salvarOuAtualizar(enderecoDto, pessoa));
-        pessoa.setSituacaoIntegracao(SituacaoIntegracao.NAO_ENVIADO);
 
+        pessoa.setEndereco(enderecoService.salvarOuAtualizar(enderecoDto, pessoa));
+        pessoa.setSituacaoIntegracao(SituacaoIntegracao.NAO_ENVIADO.toString());
         Pessoa pessoaSalva = pessoaRepository.save(pessoa);
-        pessoaProducer.enviarPessoaParaFila(dto);
-        pessoa.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE);
+
+        try {
+            pessoaSalva.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE.toString());
+            pessoaRepository.save(pessoaSalva);
+            pessoaIntegracaoProducer.enviarPessoaParaFila(dto);
+        } catch (Exception e) {
+            log.error("Erro ao enviar pessoa para fila: {}", e.getMessage(), e);
+        }
 
         return new PessoaResponseDto(pessoaSalva.getIdPessoa(), "Pessoa cadastrada com sucesso");
     }
@@ -76,19 +81,24 @@ public class PessoaServiceImpl implements PessoaService {
         preencherDadosPessoa(pessoa, dto);
         pessoa.setEndereco(enderecoService.salvarOuAtualizar(dto.endereco(), pessoa));
 
-        Pessoa atualizada = pessoaRepository.save(pessoa);
-        pessoaProducer.enviarPessoaParaFila(dto);
+        try {
+            pessoa.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE.toString());
+            pessoaRepository.save(pessoa);
+            pessoaIntegracaoProducer.enviarPessoaParaFila(dto);
+        } catch (Exception e) {
+            log.error("Erro ao enviar pessoa para fila: {}", e.getMessage(), e);
+            pessoa.setSituacaoIntegracao(SituacaoIntegracao.ERRO.toString());
+            pessoaRepository.save(pessoa);
+        }
 
-        return new PessoaResponseDto(atualizada.getIdPessoa(), "Pessoa atualizada com sucesso");
+        return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa atualizada com sucesso");
     }
 
     @Override
     public void remover(String cpf) {
         try {
             pessoaApiClient.removerPessoa(cpf);
-
             pessoaRepository.deleteByCpf(cpf);
-
         } catch (Exception e) {
             log.error("Erro ao remover CPF {} na API", cpf, e.getStackTrace());
             throw new RuntimeException("Erro ao remover pessoa na API: " + e.getMessage(), e);
@@ -103,6 +113,64 @@ public class PessoaServiceImpl implements PessoaService {
     @Override
     public PessoaRequestDto consultarPorCpf(String cpf) {
         return pessoaApiClient.consultarPessoaPorCpf(cpf);
+    }
+
+    @Override
+    @Transactional
+    public void reenviarIntegracao(String cpf) {
+        Pessoa pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+
+        String situacao = pessoa.getSituacaoIntegracao();
+        if (!situacao.equals(SituacaoIntegracao.PENDENTE.toString()) &&
+                !situacao.equals(SituacaoIntegracao.ERRO.toString())) {
+            throw new RuntimeException("Integração só pode ser reenviada se a situação for Pendente ou Erro");
+        }
+
+        PessoaRequestDto dto = mapToDto(pessoa);
+
+        pessoa.setSituacaoIntegracao(SituacaoIntegracao.PENDENTE.toString());
+        pessoaRepository.save(pessoa);
+
+        pessoaIntegracaoProducer.enviarPessoaParaFila(dto);
+        log.info("Integração reenviada manualmente para CPF {}", cpf);
+    }
+
+    @Override
+    @Transactional
+    public void integrarPessoa(PessoaRequestDto dto) {
+        try {
+            pessoaApiClient.atualizarPessoa(dto.cpf(), dto);
+            atualizarSituacao(dto.cpf(), SituacaoIntegracao.SUCESSO.toString());
+            pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
+                    dto.cpf(), SituacaoIntegracao.SUCESSO.toString(), "Pessoa atualizada com sucesso"
+            ));
+        } catch (HttpClientErrorException.NotFound e) {
+            try {
+                pessoaApiClient.criarPessoa(dto);
+                atualizarSituacao(dto.cpf(), SituacaoIntegracao.SUCESSO.toString());
+                pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
+                        dto.cpf(), SituacaoIntegracao.SUCESSO.toString(), "Pessoa cadastrada com sucesso"
+                ));
+            } catch (Exception ex) {
+                atualizarSituacao(dto.cpf(), SituacaoIntegracao.ERRO.toString());
+                pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
+                        dto.cpf(), SituacaoIntegracao.ERRO.toString(), "Erro ao cadastrar pessoa: " + ex.getMessage()
+                ));
+            }
+        } catch (Exception ex) {
+            atualizarSituacao(dto.cpf(), SituacaoIntegracao.ERRO.toString());
+            pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
+                    dto.cpf(), SituacaoIntegracao.ERRO.toString(), "Erro ao atualizar pessoa: " + ex.getMessage()
+            ));
+        }
+    }
+
+    private void atualizarSituacao(String cpf, String situacao) {
+        pessoaRepository.findByCpf(cpf).ifPresent(p -> {
+            p.setSituacaoIntegracao(situacao);
+            pessoaRepository.save(p);
+        });
     }
 
     private void validarNome(String nome) {

@@ -16,7 +16,7 @@ public class PessoaController {
 
     private final PessoaService pessoaService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<PessoaResponseDto> salvar(@RequestBody PessoaRequestDto dto) {
         return ResponseEntity.ok(pessoaService.salvar(dto));
     }
@@ -31,7 +31,7 @@ public class PessoaController {
         return ResponseEntity.ok(pessoaService.consultarPorCpf(cpf));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<PessoaRequestDto>> listarTodos() {
         return ResponseEntity.ok(pessoaService.listarTodos());
     }
@@ -40,5 +40,11 @@ public class PessoaController {
     public ResponseEntity<Void> deletar(@PathVariable String cpf) {
         pessoaService.remover(cpf);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/integrar/{cpf}")
+    public ResponseEntity<Void> reenviarIntegracao(@PathVariable String cpf) {
+        pessoaService.reenviarIntegracao(cpf);
+        return ResponseEntity.ok().build();
     }
 }

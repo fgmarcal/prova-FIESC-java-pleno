@@ -16,6 +16,16 @@ public class PessoaApiClient {
     private String apiBaseUrl;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    public PessoaResponseDto criarPessoa(PessoaRequestDto dto) {
+        String url = apiBaseUrl + "/pessoa/";
+        return restTemplate.postForObject(url, dto, PessoaResponseDto.class);
+    }
+
+    public PessoaResponseDto atualizarPessoa(String cpf, PessoaRequestDto dto) {
+        String url = apiBaseUrl + "/pessoa/cpf/" + cpf;
+        restTemplate.put(url, dto);
+        return new PessoaResponseDto(null, "Pessoa atualizada com sucesso");
+    }
 
     public PessoaRequestDto consultarPessoaPorCpf(String cpf) {
         String url = apiBaseUrl + "/pessoa/cpf/" + cpf;
@@ -24,12 +34,14 @@ public class PessoaApiClient {
     }
 
     public List<PessoaRequestDto> listarTodas() {
-        PessoaRequestDto[] pessoas = restTemplate.getForObject(apiBaseUrl, PessoaRequestDto[].class);
+        String url = apiBaseUrl + "/pessoa/all";
+        PessoaRequestDto[] pessoas = restTemplate.getForObject(url, PessoaRequestDto[].class);
         return pessoas != null ? Arrays.asList(pessoas) : List.of();
     }
 
     public PessoaResponseDto removerPessoa(String cpf) {
-        restTemplate.delete(apiBaseUrl + "/cpf/" + cpf);
+        String url = apiBaseUrl + "/pessoa/cpf/" + cpf;
+        restTemplate.delete(url);
         return new PessoaResponseDto(null, "Pessoa removida com sucesso");
     }
 }

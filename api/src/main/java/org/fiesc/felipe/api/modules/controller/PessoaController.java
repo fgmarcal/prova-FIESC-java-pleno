@@ -7,6 +7,7 @@ import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -16,7 +17,13 @@ public class PessoaController {
 
     private final PessoaService pessoaService;
 
-    @GetMapping
+    @PostMapping("/")
+    public ResponseEntity<PessoaResponseDto> criarPessoa(@RequestBody PessoaRequestDto dto) {
+        pessoaService.salvarPessoa(dto);
+        return ResponseEntity.created(URI.create("/pessoa/cpf/" + dto.cpf())).body(new PessoaResponseDto(null, "Pessoa criada com sucesso"));
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<PessoaRequestDto>> listar() {
         return ResponseEntity.ok(pessoaService.listarTodos());
     }
@@ -30,4 +37,14 @@ public class PessoaController {
     public ResponseEntity<PessoaResponseDto> deletarPorCpf(@PathVariable String cpf) {
         return ResponseEntity.ok(pessoaService.removerPorCpf(cpf));
     }
+
+    @PutMapping("/cpf/{cpf}")
+    public ResponseEntity<Void> atualizarPessoa(@PathVariable String cpf, @RequestBody PessoaRequestDto dto) {
+        if (!cpf.equals(dto.cpf())) {
+            return ResponseEntity.badRequest().build();
+        }
+        pessoaService.atualizarPessoa(dto);
+        return ResponseEntity.ok().build();
+    }
+
 }

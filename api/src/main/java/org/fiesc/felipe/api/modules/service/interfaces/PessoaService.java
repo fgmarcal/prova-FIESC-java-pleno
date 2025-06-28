@@ -10,4 +10,6 @@ public interface PessoaService {
     List<PessoaRequestDto> listarTodos();
     PessoaRequestDto consultarPorCpf(String cpf);
     PessoaResponseDto removerPorCpf(String cpf);
+    void atualizarPessoa(PessoaRequestDto dto);
+    boolean existePorCpf(String cpf);
 }

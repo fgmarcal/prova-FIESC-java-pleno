@@ -2,14 +2,11 @@ package org.fiesc.felipe.api.modules.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.fiesc.felipe.api.modules.model.dto.PessoaIntegracaoStatusDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
 import org.fiesc.felipe.api.modules.model.entity.Endereco;
 import org.fiesc.felipe.api.modules.model.entity.Pessoa;
-import org.fiesc.felipe.api.modules.model.enums.SituacaoIntegracao;
-import org.fiesc.felipe.api.modules.queue.producer.PessoaIntegracaoProducer;
 import org.fiesc.felipe.api.modules.repository.PessoaRepository;
 import org.fiesc.felipe.api.modules.service.external.CorreiosIntegrationService;
 import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
@@ -26,7 +23,6 @@ public class PessoaServiceImpl implements PessoaService {
 
     private final PessoaRepository pessoaRepository;
     private final CorreiosIntegrationService correiosIntegrationService;
-    private final PessoaIntegracaoProducer pessoaIntegracaoProducer;
 
     @Override
     @Transactional
@@ -34,11 +30,6 @@ public class PessoaServiceImpl implements PessoaService {
         if (dto == null || dto.cpf() == null) {
             throw new RuntimeException("CPF da pessoa é obrigatório ou objeto inválido");
         }
-
-        if (pessoaRepository.findByCpf(dto.cpf()).isPresent()) {
-            throw new RuntimeException("CPF já cadastrado");
-        }
-
         validarCamposObrigatorios(dto);
 
         Pessoa pessoa = new Pessoa();
@@ -59,18 +50,39 @@ public class PessoaServiceImpl implements PessoaService {
 
         endereco.setPessoa(pessoa);
         pessoa.setEndereco(endereco);
-        try {
         pessoaRepository.save(pessoa);
-        pessoaIntegracaoProducer.enviarStatus(
-                new PessoaIntegracaoStatusDto(pessoa.getCpf(), SituacaoIntegracao.SUCESSO, "Pessoa salva com sucesso")
-        );
-        } catch (Exception e) {
-            log.error("Erro ao salvar pessoa: {}", e.getMessage(), e);
-            pessoaIntegracaoProducer.enviarStatus(
-                    new PessoaIntegracaoStatusDto(dto.cpf(), SituacaoIntegracao.ERRO, "Falha ao salvar pessoa: " + e.getMessage())
-            );
-            throw e;
+    }
+
+    @Override
+    @Transactional
+    public void atualizarPessoa(PessoaRequestDto dto) {
+        Pessoa pessoa = pessoaRepository.findByCpf(dto.cpf())
+                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+
+        validarCamposObrigatorios(dto);
+
+        pessoa.setNome(dto.nome());
+        pessoa.setCpf(dto.cpf());
+        pessoa.setEmail(dto.email());
+        validarDataNascimento(dto, pessoa);
+
+        EnderecoDto enderecoValido = getEnderecoValido(dto);
+
+        Endereco endereco = pessoa.getEndereco();
+        if (endereco == null) {
+            endereco = new Endereco();
+            endereco.setPessoa(pessoa);
         }
+
+        endereco.setCep(enderecoValido.cep());
+        endereco.setRua(enderecoValido.rua());
+        endereco.setNumero(dto.endereco().numero());
+        endereco.setCidade(enderecoValido.cidade());
+        endereco.setEstado(enderecoValido.estado());
+
+        pessoa.setEndereco(endereco);
+
+        pessoaRepository.save(pessoa);
     }
 
     @Override
@@ -94,6 +106,12 @@ public class PessoaServiceImpl implements PessoaService {
         pessoaRepository.delete(pessoa);
         return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa removida com sucesso");
     }
+
+    @Override
+    public boolean existePorCpf(String cpf) {
+        return pessoaRepository.findByCpf(cpf).isPresent();
+    }
+
 
     private PessoaRequestDto mapToDto(Pessoa pessoa) {
         Endereco endereco = pessoa.getEndereco();

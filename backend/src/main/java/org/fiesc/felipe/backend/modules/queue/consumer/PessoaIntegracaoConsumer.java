@@ -2,8 +2,9 @@ package org.fiesc.felipe.backend.modules.queue.consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.fiesc.felipe.backend.modules.model.dto.PessoaIntegracaoStatusDto;
-import org.fiesc.felipe.backend.modules.repository.PessoaRepository;
+import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
+import org.fiesc.felipe.backend.modules.queue.producer.PessoaIntegracaoProducer;
+import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,19 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PessoaIntegracaoConsumer {
 
-    private final PessoaRepository pessoaRepository;
+    private final PessoaService pessoaService;
 
-    @RabbitListener(queues = "fila.pessoa.retorno")
+    @RabbitListener(queues = "fila.pessoa.integracao")
     @Transactional
-    public void receberStatus(PessoaIntegracaoStatusDto dto) {
-        log.info("Recebido status de integração: {}", dto);
-
-        pessoaRepository.findByCpf(dto.cpf()).ifPresentOrElse(pessoa -> {
-            pessoa.setSituacaoIntegracao(dto.situacao());
-            pessoaRepository.save(pessoa);
-            log.info("Pessoa atualizada com status: {}", dto.situacao());
-        }, () -> {
-            log.warn("Pessoa com CPF {} não encontrada para atualização de status", dto.cpf());
-        });
+    public void receberPessoa(PessoaRequestDto dto) {
+        log.info("Consumindo pessoa da fila para integracao: {}", dto);
+        pessoaService.integrarPessoa(dto);
     }
 }

@@ -6,6 +6,6 @@ import java.io.Serializable;
 
 public record PessoaIntegracaoStatusDto(
         String cpf,
-        SituacaoIntegracao situacao,
+        String situacao,
         String mensagem
 ) implements Serializable {}
