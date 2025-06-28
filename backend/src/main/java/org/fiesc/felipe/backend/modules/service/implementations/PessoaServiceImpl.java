@@ -71,6 +71,8 @@ public class PessoaServiceImpl implements PessoaService {
         pessoa.setEndereco(enderecoService.salvarOuAtualizar(dto.endereco(), pessoa));
 
         Pessoa atualizada = pessoaRepository.save(pessoa);
+        pessoaProducer.enviarPessoaParaFila(dto);
+
         return new PessoaResponseDto(atualizada.getIdPessoa(), "Pessoa atualizada com sucesso");
     }
 
