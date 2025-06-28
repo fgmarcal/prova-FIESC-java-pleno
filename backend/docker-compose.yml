@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+
+  postgres_backend:
+    image: postgres:15
+    container_name: postgres_backend
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: backend_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+volumes:
+  pgdata:
