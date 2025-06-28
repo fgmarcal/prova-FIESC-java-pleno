@@ -26,7 +26,7 @@ public class CorreiosIntegrationServiceImpl implements CorreiosIntegrationServic
             Map<?, ?> response = restTemplate.getForObject(url, Map.class);
 
             if (response == null || response.containsKey("erro")) {
-                return null; // CEP inválido
+                return null;
             }
 
             return new EnderecoDto(

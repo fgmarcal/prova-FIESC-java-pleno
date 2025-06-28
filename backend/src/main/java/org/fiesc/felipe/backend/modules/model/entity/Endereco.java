@@ -1,6 +1,5 @@
 package org.fiesc.felipe.backend.modules.model.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
