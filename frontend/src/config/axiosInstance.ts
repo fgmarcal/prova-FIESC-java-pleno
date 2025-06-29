@@ -1,8 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import type { ErrorResponse } from '../types/ErrorResponse';
+import { BASE_URL } from './endpoints';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: BASE_URL,
   timeout: 10000,
 });
 

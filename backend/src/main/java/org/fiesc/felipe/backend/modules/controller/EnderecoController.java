@@ -16,9 +16,6 @@ public class EnderecoController {
     @GetMapping("/cep/{cep}")
     public ResponseEntity<EnderecoDto> buscarEnderecoPorCep(@PathVariable String cep) {
         EnderecoDto dto = correiosService.buscarEnderecoPorCep(cep);
-        if (dto == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(dto);
     }
 }

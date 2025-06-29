@@ -15,7 +15,7 @@ export const notifyError = (error: unknown) => {
   if (e.mensagem) {
     const detalhes = e.detalhe ? `\n${e.detalhe}` : '';
     console.error('[API ERROR]', e.mensagem, detalhes);
-    message.error(`${e.mensagem}${detalhes}`, 4);
+    message.error(`${e.mensagem}`, 4);
   } else if (error instanceof Error) {
     message.error(error.message, 4);
   } else {

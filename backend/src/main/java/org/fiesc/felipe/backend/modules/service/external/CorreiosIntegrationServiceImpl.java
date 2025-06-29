@@ -1,8 +1,11 @@
 package org.fiesc.felipe.backend.modules.service.external;
 
 import lombok.extern.slf4j.Slf4j;
+import org.fiesc.felipe.backend.modules.exceptions.NotFoundException;
 import org.fiesc.felipe.backend.modules.model.dto.EnderecoDto;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,7 +29,7 @@ public class CorreiosIntegrationServiceImpl implements CorreiosIntegrationServic
             Map<?, ?> response = restTemplate.getForObject(url, Map.class);
 
             if (response == null || response.containsKey("erro")) {
-                return null;
+                throw new NotFoundException("CEP não encontrado: " + cep);
             }
 
             return new EnderecoDto(
@@ -36,9 +39,16 @@ public class CorreiosIntegrationServiceImpl implements CorreiosIntegrationServic
                     (String) response.get("localidade"),
                     (String) response.get("uf")
             );
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                log.info(e.getMessage());
+                throw new NotFoundException("CEP não encontrado: " + cep);
+            }
+            log.error("Erro HTTP ao consultar CEP: {}", cep, e);
+            throw new NotFoundException("Erro ao consultar o CEP: " + cep, e);
         } catch (Exception e) {
-            log.error("Erro ao consultar CEP: {}", cep, e);
-            return null;
+            log.error("Erro inesperado ao consultar CEP: {}", cep, e);
+            throw new NotFoundException("Erro ao consultar o CEP: " + cep, e);
         }
     }
 }
