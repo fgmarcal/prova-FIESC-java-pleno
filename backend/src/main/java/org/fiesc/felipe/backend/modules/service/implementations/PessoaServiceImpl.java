@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,10 +116,40 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     public List<PessoaApiResponseDto> listarTodos() {
-        return pessoaApiClient.listarTodas().stream()
-                .map(this::mergePessoaData)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        List<Pessoa> pessoas = pessoaRepository.findAll();
+
+        Map<String, PessoaApiResponseDto> dadosApi = new HashMap<>();
+        try {
+            pessoaApiClient.listarTodas().forEach(apiPessoa -> {
+                dadosApi.put(apiPessoa.cpf(), apiPessoa);
+            });
+        } catch (Exception e) {
+            log.info("Erro integrar a lista completa: {}", e.getMessage(), e);
+        }
+        return pessoas.stream()
+                .map(pessoa -> {
+                    PessoaApiResponseDto apiPessoa = dadosApi.get(pessoa.getCpf());
+                    return new PessoaApiResponseDto(
+                            pessoa.getNome(),
+                            pessoa.getCpf(),
+                            pessoa.getNascimento() != null ? pessoa.getNascimento().format(formatter) : null,
+                            pessoa.getEmail(),
+                            new EnderecoDto(
+                                    pessoa.getEndereco().getCep(),
+                                    pessoa.getEndereco().getRua(),
+                                    pessoa.getEndereco().getNumero(),
+                                    pessoa.getEndereco().getCidade(),
+                                    pessoa.getEndereco().getEstado()
+                            ),
+                            apiPessoa != null ? apiPessoa.dataHoraInclusao() : null,
+                            apiPessoa != null ? apiPessoa.dataHoraAtualizacao() : null,
+                            pessoa.getSituacaoIntegracao()
+                    );
+                })
                 .toList();
     }
+
 
     @Override
     public PessoaApiResponseDto consultarPorCpf(String cpf) {
