@@ -27,6 +27,7 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 - **PostgreSQL**
 - **RabbitMQ**
 - **Lombok**
+- **Maven**
 - **Mockito / JUnit 5**
 
 ### Frontend (SPA)
@@ -44,7 +45,7 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 
 ## Iniciando o projeto
  - O *backend* irá utilizar a porta 8080 enquanto que a *api* usará a porta 8081
- 
+
 ### Crie um arquivo .env na raiz de cada pasta
 
  - Pasta *backend*: Dados de desenvolvimento
