@@ -1,10 +1,10 @@
-import PessoaForm from '../shared/PessoaForm';
-import PessoaSearch from '../shared/PessoaSearch';
-import PessoaTable from '../shared/PessoaTable';
+import PessoaForm from '../shared/form/PessoaForm';
+import PessoaSearch from '../shared/search/PessoaSearch';
+import PessoaTable from '../shared/table/PessoaTable';
 
 export default function CadastroPessoaPage() {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 m-10">
       <PessoaForm />
       <PessoaTable />
       <PessoaSearch />

@@ -8,25 +8,15 @@ import {
     Row,
   } from 'antd';
   import { ReloadOutlined, SaveOutlined, SearchOutlined } from '@ant-design/icons';
-  import { useState } from 'react';
-  import { EnderecoApi } from '../../api/EnderecoApi';
+  import { useEffect, useState } from 'react';
+  import { EnderecoApi } from '../../../api/EnderecoApi';
   import dayjs from 'dayjs';
-import { notifyError, notifySuccess } from './notification';
-  
-  interface PessoaFormData {
-    nome: string;
-    nascimento?: string;
-    cpf?: string;
-    email?: string;
-    cep?: string;
-    numero?: string;
-    logradouro?: string;
-    bairro?: string;
-    cidade?: string;
-    estado?: string;
-  }
+import { notifyError, notifySuccess } from '../notifications/notification';
+import { usePessoa } from '../../../context/usePessoa';
+import type { PessoaFormData } from '../../../types/PessoaFormData';
   
   export default function PessoaForm() {
+    const { pessoaEditando } = usePessoa();
     const [form] = Form.useForm<PessoaFormData>();
     const [loadingCep, setLoadingCep] = useState(false);
   
@@ -39,8 +29,7 @@ import { notifyError, notifySuccess } from './notification';
           const endereco = await EnderecoApi.buscaCep(cep);
       
           form.setFieldsValue({
-            logradouro: endereco.rua,
-            bairro: endereco.bairro,
+            rua: endereco.rua,
             cidade: endereco.cidade,
             estado: endereco.estado,
           });
@@ -53,16 +42,50 @@ import { notifyError, notifySuccess } from './notification';
       };
       
   
-    const onFinish = (values: PessoaFormData) => {
-      const payload = {
-        ...values,
-        cpf: values.cpf?.replace(/\D/g, ''),
-        nascimento: values.nascimento ? dayjs(values.nascimento).toISOString() : undefined,
+      const onFinish = (values: PessoaFormData) => {
+        const {
+          cep,
+          rua: logradouro,
+          nascimento,
+          cidade,
+          estado,
+          numero,
+          ...dadosPessoais
+        } = values;
+      
+        const nascimentoISO =
+          dayjs.isDayjs(nascimento) ? nascimento.toISOString() : nascimento ?? undefined;
+
+        const payload = {
+          ...dadosPessoais,
+          cpf: values.cpf?.replace(/\D/g, ''),
+          nascimento: nascimentoISO,
+          endereco: {
+            cep,
+            rua: logradouro,
+            cidade,
+            estado,
+            numero,
+          },
+        };
+      
+        console.log('Salvar:', payload);
+        notifySuccess('Pessoa salva com sucesso!');
       };
-  
-      console.log('Salvar:', payload);
-      notifySuccess('Pessoa salva com sucesso!');
-    };
+      
+
+    useEffect(() => {
+      if (pessoaEditando) {
+        const { endereco, ...dadosPessoais } = pessoaEditando;
+        form.setFieldsValue({
+          ...dadosPessoais,
+          nascimento: pessoaEditando.nascimento ? dayjs(pessoaEditando.nascimento) : null,
+          ...endereco,
+        });
+      } else {
+        form.resetFields();
+      }
+    }, [pessoaEditando, form]);
   
     return (
       <Card title="Cadastro de Pessoa" className="w-full">
@@ -146,7 +169,7 @@ import { notifyError, notifySuccess } from './notification';
   
           <Row gutter={0}>
             <Col span={24}>
-              <fieldset className="border border-gray-300 p-4 rounded-md relative">
+              <fieldset className="border border-gray-300 p-8 rounded-md relative">
                 <legend className="text-sm font-medium px-2">Endereço</legend>
                 <Row gutter={16} align="middle">
                   <Col span={8}>
@@ -175,7 +198,7 @@ import { notifyError, notifySuccess } from './notification';
                     </Form.Item>
                   </Col>
                   <Col span={14}>
-                    <Form.Item label="Rua" name="logradouro">
+                    <Form.Item label="Rua" name="rua">
                       <Input />
                     </Form.Item>
                   </Col>
@@ -211,11 +234,11 @@ import { notifyError, notifySuccess } from './notification';
             </Col>
           </Row>
   
-          <div className="flex justify-end gap-2 mt-6">
-            <Button icon={<ReloadOutlined />} htmlType="button" onClick={() => form.resetFields()}>
+          <div className="flex justify-start gap-2 mt-6">
+            <Button icon={<ReloadOutlined />} htmlType="button" onClick={() => form.resetFields()} style={{margin:'0.8rem'}}>
               Limpar
             </Button>
-            <Button icon={<SaveOutlined />} type="primary" htmlType="submit">
+            <Button icon={<SaveOutlined />} type="primary" htmlType="submit" style={{margin:'0.8rem'}}>
               Salvar
             </Button>
           </div>

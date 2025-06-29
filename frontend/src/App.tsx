@@ -1,9 +1,12 @@
 import CadastroPessoaPage from "./components/pages/CadastroPessoasPage"
+import { PessoaProvider } from "./context/PessoaContextProvider"
 
 function App() {
 
   return (
-    <CadastroPessoaPage />
+    <PessoaProvider>
+      <CadastroPessoaPage />
+    </PessoaProvider>
   )
 }
 

@@ -1,19 +1,11 @@
 import axios, { AxiosError } from 'axios';
-
-const BASE_URL = 'http://localhost:8080';
-
-export interface EnderecoResponse {
-  cep: string;
-  rua: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-}
+import type { EnderecoResponse } from '../types/EnderecoResponse';
+import { endpoints } from '../config/endpoints';
 
 export class EnderecoApi {
     static async buscaCep(cep: string): Promise<EnderecoResponse> {
       try {
-        const { data } = await axios.get<EnderecoResponse>(`${BASE_URL}/endereco/cep/${cep}`);
+        const { data } = await axios.get<EnderecoResponse>(endpoints.endereco.buscaCep(cep));
         return data;
       } catch (err) {
         const error = err as AxiosError;

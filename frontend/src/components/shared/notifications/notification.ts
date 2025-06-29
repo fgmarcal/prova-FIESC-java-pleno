@@ -1,6 +1,5 @@
-// src/utils/notification.ts
 import { message } from 'antd';
-import type { ErrorResponse } from '../../types/ErrorResponse';
+import type { ErrorResponse } from '../../../types/ErrorResponse';
 
 export const notifySuccess = (msg: string) => {
   message.success(msg, 3);
