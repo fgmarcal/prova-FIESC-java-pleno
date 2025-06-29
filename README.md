@@ -17,7 +17,7 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Backend
 
@@ -41,3 +41,24 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 
 ### Infraestrutura
 - **Docker**
+
+## Iniciando o projeto
+
+- Crie um arquivo .env na raiz de cada pasta
+
+-- Pasta ~backend~: Dados de desenvolvimento
+
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/backend_db
+SPRING_DATASOURCE_USERNAME=user
+SPRING_DATASOURCE_PASSWORD=pass
+SPRING_RABBITMQ_HOST=localhost
+SPRING_RABBITMQ_PORT=5672
+SPRING_RABBITMQ_USERNAME=guest
+SPRING_RABBITMQ_PASSWORD=guest
+API_PESSOA_BASE_URL=http://localhost:8081
+FRONTEND_BASE_URL=http://localhost:5173
+```
+
+-- Pasta ~api~: Dados de desenvolvimento
+
