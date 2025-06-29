@@ -134,7 +134,13 @@ export default function PessoaTable() {
 
   useEffect(() => {
     loadTableData();
-  },[reloadTrigger]);
+  
+    const interval = setInterval(() => {
+      loadTableData();
+    }, 60000);
+  
+    return () => clearInterval(interval);
+  }, [reloadTrigger]);
 
   return (
     <Card title="Pessoas Cadastradas" className="w-full mt-4">
