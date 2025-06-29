@@ -1,4 +1,6 @@
-export const BASE_URL = 'http://localhost:8080';
+import { loadBaseURL } from "./loadEnv";
+
+export const BASE_URL = loadBaseURL();
 
 const ENDERECO = BASE_URL + '/endereco';
 const PESSOA = BASE_URL + '/pessoa';

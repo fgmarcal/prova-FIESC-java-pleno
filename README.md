@@ -43,10 +43,11 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 - **Docker**
 
 ## Iniciando o projeto
+ - O *backend* irá utilizar a porta 8080 enquanto que a *api* usará a porta 8081
+ 
+### Crie um arquivo .env na raiz de cada pasta
 
-- Crie um arquivo .env na raiz de cada pasta
-
--- Pasta ~backend~: Dados de desenvolvimento
+ - Pasta *backend*: Dados de desenvolvimento
 
 ```
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/backend_db
@@ -60,5 +61,18 @@ API_PESSOA_BASE_URL=http://localhost:8081
 FRONTEND_BASE_URL=http://localhost:5173
 ```
 
--- Pasta ~api~: Dados de desenvolvimento
+ - Pasta *api*: Dados de desenvolvimento
 
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5434/api_db
+SPRING_DATASOURCE_USERNAME=user
+SPRING_DATASOURCE_PASSWORD=pass
+
+BACKEND_ALLOWED_ORIGIN=http://localhost:8080
+```
+
+ - Pasta *frontend*: Dados de desenvolvimento
+
+```
+BASE_URL='http://localhost:8080'
+```
