@@ -19,16 +19,23 @@ import { PessoaApi } from '../../../api/PessoaApi';
 import { addCpfFormat } from '../../../utils/utils';
   
   export default function PessoaForm() {
-    const { pessoaEditando } = usePessoa();
+    const { pessoaEditando, editMode, setEditMode, triggerReload } = usePessoa();
     const [form] = Form.useForm<PessoaFormData>();
-    const [loadingCep, setLoadingCep] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [requiredField, setRequiredField] = useState<boolean>(false);
+
+    const clearFields = () => {
+      form.resetFields();
+      setRequiredField(false);
+      setIsLoading(false);
+      setEditMode(false);
+    }
   
     const buscarCep = async () => {
         const cep = form.getFieldValue('cep')?.replace(/\D/g, '');
         if (!cep || cep.length !== 8) return;
       
-        setLoadingCep(true);
+        setIsLoading(true);
         try {
           const endereco = await EnderecoApi.buscaCep(cep);
       
@@ -41,11 +48,12 @@ import { addCpfFormat } from '../../../utils/utils';
         } catch (error) {
             notifyError(error);
         } finally {
-          setLoadingCep(false);
+          setIsLoading(false);
         }
       };
 
       const handleApiRequest = async(pessoaEditando: PessoaRequest | null, payload: PessoaRequest) => {
+        setIsLoading(true);
         try {
           if (pessoaEditando && pessoaEditando.cpf) {
             await PessoaApi.atualizar(pessoaEditando.cpf, payload);
@@ -54,13 +62,14 @@ import { addCpfFormat } from '../../../utils/utils';
             await PessoaApi.criar(payload);
             notifySuccess('Pessoa salva com sucesso!');
           }
-          form.resetFields();
         } catch (error) {
           notifyError(error);
+        }finally {
+          clearFields();
+          triggerReload();
         }
       }
       
-  
       const onFinish = async (values: PessoaFormData) => {
         const {
           cep,
@@ -93,7 +102,7 @@ import { addCpfFormat } from '../../../utils/utils';
       
 
     useEffect(() => {
-      if (pessoaEditando) {
+      if (editMode && pessoaEditando) {
         const { endereco, nascimento,cpf,...dadosPessoais } = pessoaEditando;
         form.setFieldsValue({
           ...dadosPessoais,
@@ -104,7 +113,7 @@ import { addCpfFormat } from '../../../utils/utils';
       } else {
         form.resetFields();
       }
-    }, [pessoaEditando, form]);
+    }, [pessoaEditando, form, editMode]);
 
     useEffect(() => {
       const hasCep = form.getFieldValue('cep');
@@ -112,7 +121,7 @@ import { addCpfFormat } from '../../../utils/utils';
     }, [form]);
   
     return (
-      <Card title="Cadastro de Pessoa" className="w-full">
+      <Card title="Cadastro de Pessoa" style={{fontSize:'900', fontWeight:'bold'}}>
         <Form
           form={form}
           layout="vertical"
@@ -231,7 +240,7 @@ import { addCpfFormat } from '../../../utils/utils';
                     <Form.Item label=" ">
                       <Button
                         onClick={buscarCep}
-                        loading={loadingCep}
+                        loading={isLoading}
                         icon={<SearchOutlined />}
                         type='primary'
                         htmlType="button"
@@ -242,7 +251,7 @@ import { addCpfFormat } from '../../../utils/utils';
                 <Row gutter={16} align="middle">
                   <Col span={18}>
                     <Form.Item label="Rua" name="rua" rules={[{required:requiredField}]}>
-                      <Input disabled={loadingCep}/>
+                      <Input disabled={isLoading}/>
                     </Form.Item>
                   </Col>
                   <Col span={3}>
@@ -257,7 +266,7 @@ import { addCpfFormat } from '../../../utils/utils';
                         {required:requiredField}
                       ]}
                     >
-                      <Input type="default" disabled={loadingCep} />
+                      <Input type="default" disabled={isLoading} />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -265,12 +274,12 @@ import { addCpfFormat } from '../../../utils/utils';
                 <Row gutter={16}>
                   <Col span={18}>
                     <Form.Item label="Cidade" name="cidade" rules={[{required:requiredField}]}>
-                      <Input disabled={loadingCep}/>
+                      <Input disabled={isLoading}/>
                     </Form.Item>
                   </Col>
                   <Col span={3}>
                     <Form.Item label="Estado" name="estado" rules={[{required:requiredField}]}>
-                      <Input disabled={loadingCep}/>
+                      <Input disabled={isLoading}/>
                     </Form.Item>
                   </Col>
                 </Row>
@@ -279,10 +288,10 @@ import { addCpfFormat } from '../../../utils/utils';
           </Row>
   
           <div className="flex justify-start gap-2 mt-6">
-            <Button icon={<ReloadOutlined />} htmlType="button" onClick={() => form.resetFields()} style={{margin:'0.8rem'}}>
+            <Button icon={<ReloadOutlined />} htmlType="button" onClick={clearFields} style={{margin:'0.8rem'}} disabled={isLoading}>
               Limpar
             </Button>
-            <Button icon={<SaveOutlined />} type="primary" htmlType="submit" style={{margin:'0.8rem'}}>
+            <Button icon={<SaveOutlined />} type="primary" htmlType="submit" style={{margin:'0.8rem'}} disabled={isLoading}>
               Salvar
             </Button>
           </div>
