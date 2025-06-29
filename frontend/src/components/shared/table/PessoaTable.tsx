@@ -2,82 +2,31 @@ import { Card, Table, Button, Space, Popconfirm, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SituacaoIntegracao, type SituacaoIntegracaoKey } from '../../../config/integrationStatus';
 import { usePessoa } from '../../../context/usePessoa';
 import type { Pessoa } from '../../../entities/Pessoa';
+import { PessoaApi } from '../../../api/PessoaApi';
+import { formatCpf } from '../../../utils/utils';
 
-const mockData: Pessoa[] = [
-  {
-    nome: 'Fulano da Silva',
-    nascimento: '1999-01-01',
-    cpf: '00011122233',
-    endereco: {
-      cep: '80000-000',
-      rua: 'Rua Exemplo',
-      numero: 123,
-      cidade: 'Curitiba',
-      estado: 'Paraná',
-    },
-    status: 'PENDENTE',
-  },
-  {
-    nome: 'Ciclano de Souza',
-    nascimento: '1999-01-01',
-    cpf: '11111111111',
-    endereco: {
-      cep: '80000-000',
-      rua: 'Rua Exemplo',
-      numero: 123,
-      cidade: 'Curitiba',
-      estado: 'Paraná',
-    },
-    status: 'SUCESSO',
-  },
-  {
-    nome: 'Beltrano Medeiros',
-    nascimento: '1999-01-01',
-    cpf: '99988844444',
-    endereco: {
-      cep: '80000-000',
-      rua: 'Rua Exemplo',
-      numero: 123,
-      cidade: 'Curitiba',
-      estado: 'Paraná',
-    },
-    status: 'ERRO',
-  },
-  {
-    nome: 'Beltrano Medeiros',
-    nascimento: '1999-01-01',
-    cpf: '99988844444',
-    endereco: {
-      cep: '80000-000',
-      rua: 'Rua Exemplo',
-      numero: 123,
-      cidade: 'Curitiba',
-      estado: 'Paraná',
-    },
-    status: 'ERRO',
-  },
-];
-
-const pessoas: Pessoa[] = mockData;
-
-const formatCpf = (cpf: string): string => {
-  return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-};
-
-const handleReintegrate = (record: Pessoa) => {
-  console.log('Reintegrar:', record);
-}
-
-const handleDelete = (record: Pessoa) => {
-  console.log('Remover:', record);
-}
 
 export default function PessoaTable() {
   const { setPessoaEditando } = usePessoa();
+  const [pessoas, setPessoas] = useState<Pessoa[]>([]);
+
+  const handleReintegrate = (record: Pessoa) => {
+    console.log('Reintegrar:', record);
+  }
+  
+  const handleDelete = (record: Pessoa) => {
+    console.log('Remover:', record);
+  }
+  
+  const loadTableData = async () => {
+    const response = await PessoaApi.listar();
+    setPessoas(response);
+  };
+  
 
   const columns: ColumnsType<Pessoa> = useMemo(() => [
     {
@@ -140,6 +89,10 @@ export default function PessoaTable() {
       ),
     },
   ], [setPessoaEditando]);
+
+  useEffect(() => {
+    loadTableData();
+  },[]);
 
   return (
     <Card title="Pessoas Cadastradas" className="w-full mt-4">

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,12 +114,15 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     public List<PessoaApiResponseDto> listarTodos() {
-        return pessoaApiClient.listarTodas();
+        return pessoaApiClient.listarTodas().stream()
+                .map(this::mergePessoaData)
+                .toList();
     }
 
     @Override
     public PessoaApiResponseDto consultarPorCpf(String cpf) {
-        return pessoaApiClient.consultarPessoaPorCpf(cpf);
+        var apiResponse = pessoaApiClient.consultarPessoaPorCpf(cpf);
+        return mergePessoaData(apiResponse);
     }
 
     @Override
@@ -174,6 +178,21 @@ public class PessoaServiceImpl implements PessoaService {
             ));
         }
         return null;
+    }
+
+    private PessoaApiResponseDto mergePessoaData(PessoaApiResponseDto dto) {
+        Pessoa pessoa = pessoaRepository.findByCpf(dto.cpf())
+                .orElseThrow(()-> new NotFoundException("Pessoa não existe"));
+        return new PessoaApiResponseDto(
+                dto.nome(),
+                dto.cpf(),
+                dto.nascimento(),
+                dto.email(),
+                dto.endereco(),
+                dto.dataHoraInclusao(),
+                dto.dataHoraAtualizacao(),
+                pessoa.getSituacaoIntegracao()
+        );
     }
 
     private void atualizarSituacao(String cpf, String situacao) {

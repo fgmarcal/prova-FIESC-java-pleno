@@ -8,4 +8,6 @@ export type Pessoa = {
     email?: string;
     endereco: Endereco;
     status: SituacaoIntegracaoKey;
+    dataHoraInclusao:string;
+    dataHoraAtualizacao?: string;
   };

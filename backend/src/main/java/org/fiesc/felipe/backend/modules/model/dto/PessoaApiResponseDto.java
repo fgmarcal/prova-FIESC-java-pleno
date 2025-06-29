@@ -9,5 +9,6 @@ public record PessoaApiResponseDto(
         String email,
         EnderecoDto endereco,
         String dataHoraInclusao,
-        String dataHoraAtualizacao
+        String dataHoraAtualizacao,
+        String status
 ) implements Serializable {}

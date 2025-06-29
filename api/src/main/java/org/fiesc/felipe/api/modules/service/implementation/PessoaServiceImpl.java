@@ -124,8 +124,8 @@ public class PessoaServiceImpl implements PessoaService {
         Endereco endereco = pessoa.getEndereco();
         return new PessoaResponseDto(
                 pessoa.getNome(),
-                pessoa.getNascimento() != null ? pessoa.getNascimento().format(FORMATADOR) : null,
                 pessoa.getCpf(),
+                pessoa.getNascimento() != null ? pessoa.getNascimento().format(FORMATADOR) : null,
                 pessoa.getEmail(),
                 new EnderecoDto(
                         endereco.getCep(),
