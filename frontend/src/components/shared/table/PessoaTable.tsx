@@ -6,7 +6,7 @@ import { SituacaoIntegracao, type SituacaoIntegracaoValue } from '../../../confi
 import { usePessoa } from '../../../context/usePessoa';
 import type { Pessoa } from '../../../entities/Pessoa';
 import { PessoaApi } from '../../../api/PessoaApi';
-import { formatCpf } from '../../../utils/utils';
+import { addCpfFormat } from '../../../utils/utils';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
 
@@ -46,7 +46,7 @@ export default function PessoaTable() {
     {
       title: 'CPF',
       dataIndex: 'cpf',
-      render: (cpf) => formatCpf(cpf),
+      render: (cpf) => addCpfFormat(cpf),
       key: 'cpf',
     },
     {

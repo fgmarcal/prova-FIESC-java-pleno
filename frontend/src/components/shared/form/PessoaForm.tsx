@@ -16,7 +16,7 @@ import { usePessoa } from '../../../context/usePessoa';
 import type { PessoaFormData } from '../../../types/PessoaFormData';
 import type { PessoaRequest } from '../../../types/PessoaRequest';
 import { PessoaApi } from '../../../api/PessoaApi';
-import { formatCpf } from '../../../utils/utils';
+import { addCpfFormat } from '../../../utils/utils';
   
   export default function PessoaForm() {
     const { pessoaEditando } = usePessoa();
@@ -97,7 +97,7 @@ import { formatCpf } from '../../../utils/utils';
         const { endereco, nascimento,cpf,...dadosPessoais } = pessoaEditando;
         form.setFieldsValue({
           ...dadosPessoais,
-          cpf: cpf ? formatCpf(cpf) : '',
+          cpf: cpf ? addCpfFormat(cpf) : '',
           nascimento: nascimento ? dayjs(nascimento, "DD/MM/YYYY") : null,
           ...endereco,
         });
