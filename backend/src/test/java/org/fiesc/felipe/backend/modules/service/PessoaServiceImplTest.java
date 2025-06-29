@@ -1,7 +1,6 @@
 package org.fiesc.felipe.backend.modules.service;
 
 import org.fiesc.felipe.backend.modules.shared.exceptions.NotFoundException;
-import org.fiesc.felipe.backend.modules.model.dto.*;
 import org.fiesc.felipe.backend.modules.domain.entity.Endereco;
 import org.fiesc.felipe.backend.modules.domain.entity.Pessoa;
 import org.fiesc.felipe.backend.modules.shared.enums.SituacaoIntegracao;

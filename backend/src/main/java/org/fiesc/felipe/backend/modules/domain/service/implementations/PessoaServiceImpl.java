@@ -7,12 +7,11 @@ import org.fiesc.felipe.backend.modules.infrastructure.external.PessoaApiClient;
 import org.fiesc.felipe.backend.modules.domain.service.interfaces.EnderecoService;
 import org.fiesc.felipe.backend.modules.domain.service.interfaces.PessoaService;
 import org.fiesc.felipe.backend.modules.shared.exceptions.NotFoundException;
-import org.fiesc.felipe.backend.modules.model.dto.*;
+import org.fiesc.felipe.backend.modules.shared.dto.*;
 import org.fiesc.felipe.backend.modules.domain.entity.Pessoa;
 import org.fiesc.felipe.backend.modules.shared.enums.SituacaoIntegracao;
 import org.fiesc.felipe.backend.modules.infrastructure.queue.producer.PessoaIntegracaoProducer;
 import org.fiesc.felipe.backend.modules.infrastructure.repository.PessoaRepository;
-import org.fiesc.felipe.backend.modules.shared.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

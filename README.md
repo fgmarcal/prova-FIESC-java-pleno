@@ -1,8 +1,43 @@
 # Prova Java PLENO SD - WEB - Configuração
 
-Bem-vindo à prova prática para a vaga de programador full-stack em Java no SENAI Soluções Digitais. Ficamos felizes no seu interesse pela vaga, e desejamos uma ótima prova.  
-Leia com atenção toda a documentação com os requisitos da prova que foi enviado a você e tente desenvolver o máximo que puder, mesmo que tenha que pular alguma etapa, desde que com qualidade e seguindo as regras de negócio.  
-  
-Lembrando que a configuração da prova fica a cargo do candidato, a realizar de acordo com os requisitos repassados ao candidato.  
-  
-Registrar nesse arquivo o que foi realizado da prova, as tecnologias utilizadas, o que não foi possível fazer e alguma observação que achar importante.  
+Este projeto foi desenvolvido como parte da prova prática do processo seletivo 01522/2025 para a vaga de Desenvolvedor Full Stack Pleno no SENAI/FIESC.
+
+---
+
+## Funcionalidades Implementadas
+
+- Estrutura de projeto baseada em **DDD (Domain-Driven Design)**.
+- Módulo de cadastro e atualização de pessoas, com validação de dados.
+- Integração com serviço externo para consulta de endereço via **ViaCEP**.
+- Comunicação com API externa via cliente REST.
+- Produção e envio de mensagens para fila **RabbitMQ**.
+- Recebimento e consumo de mensagens (status de integração).
+- Atualização de status de integração no banco de dados.
+- Testes unitários cobrindo regras de negócio
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+### Backend
+
+- **Java 21**
+- **Spring Boot 3**
+- **Spring Data JPA**
+- **PostgreSQL**
+- **RabbitMQ**
+- **Lombok**
+- **Mockito / JUnit 5**
+
+### Frontend (SPA)
+
+- **React 18 + Vite**
+- **TypeScript**
+- **Ant Design + Tailwind CSS**
+- **Axios**
+
+### Database
+- **Postgres 15**
+
+### Infraestrutura
+- **Docker**
