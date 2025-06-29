@@ -1,4 +1,4 @@
-import type { SituacaoIntegracaoKey } from "../config/integrationStatus";
+import type { SituacaoIntegracaoValue } from "../config/integrationStatus";
 import type { Endereco } from "./Endereco";
 
 export type Pessoa = {
@@ -7,7 +7,7 @@ export type Pessoa = {
     cpf?: string;
     email?: string;
     endereco: Endereco;
-    status: SituacaoIntegracaoKey;
+    status: SituacaoIntegracaoValue;
     dataHoraInclusao:string;
     dataHoraAtualizacao?: string;
   };

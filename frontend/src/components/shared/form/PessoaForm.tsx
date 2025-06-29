@@ -16,6 +16,7 @@ import { usePessoa } from '../../../context/usePessoa';
 import type { PessoaFormData } from '../../../types/PessoaFormData';
 import type { PessoaRequest } from '../../../types/PessoaRequest';
 import { PessoaApi } from '../../../api/PessoaApi';
+import { formatCpf } from '../../../utils/utils';
   
   export default function PessoaForm() {
     const { pessoaEditando } = usePessoa();
@@ -43,6 +44,21 @@ import { PessoaApi } from '../../../api/PessoaApi';
           setLoadingCep(false);
         }
       };
+
+      const handleApiRequest = async(pessoaEditando: PessoaRequest | null, payload: PessoaRequest) => {
+        try {
+          if (pessoaEditando && pessoaEditando.cpf) {
+            await PessoaApi.atualizar(pessoaEditando.cpf, payload);
+            notifySuccess('Pessoa atualizada com sucesso!');
+          } else {
+            await PessoaApi.criar(payload);
+            notifySuccess('Pessoa salva com sucesso!');
+          }
+          form.resetFields();
+        } catch (error) {
+          notifyError(error);
+        }
+      }
       
   
       const onFinish = async (values: PessoaFormData) => {
@@ -72,23 +88,17 @@ import { PessoaApi } from '../../../api/PessoaApi';
           },
         };
       
-        try{
-          console.log(payload);
-          await PessoaApi.criar(payload);
-          notifySuccess('Pessoa salva com sucesso!');
-          form.resetFields();
-        }catch(error) {
-          notifyError(error);
-        }          
+        await handleApiRequest(pessoaEditando, payload);
       };
       
 
     useEffect(() => {
       if (pessoaEditando) {
-        const { endereco, ...dadosPessoais } = pessoaEditando;
+        const { endereco, nascimento,cpf,...dadosPessoais } = pessoaEditando;
         form.setFieldsValue({
           ...dadosPessoais,
-          nascimento: pessoaEditando.nascimento ? dayjs(pessoaEditando.nascimento) : null,
+          cpf: cpf ? formatCpf(cpf) : '',
+          nascimento: nascimento ? dayjs(nascimento, "DD/MM/YYYY") : null,
           ...endereco,
         });
       } else {
@@ -97,14 +107,9 @@ import { PessoaApi } from '../../../api/PessoaApi';
     }, [pessoaEditando, form]);
 
     useEffect(() => {
-      const hasCep = form.getFieldValue('cep')
-      if (hasCep) {
-        setRequiredField(true);
-      }
-      else {
-        setRequiredField(false);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }}, [form.getFieldValue('cep')]);
+      const hasCep = form.getFieldValue('cep');
+      setRequiredField(!!hasCep);
+    }, [form]);
   
     return (
       <Card title="Cadastro de Pessoa" className="w-full">

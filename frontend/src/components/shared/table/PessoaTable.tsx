@@ -1,13 +1,16 @@
 import { Card, Table, Button, Space, Popconfirm, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
-import { SituacaoIntegracao, type SituacaoIntegracaoKey } from '../../../config/integrationStatus';
+import { SituacaoIntegracao, type SituacaoIntegracaoValue } from '../../../config/integrationStatus';
 import { usePessoa } from '../../../context/usePessoa';
 import type { Pessoa } from '../../../entities/Pessoa';
 import { PessoaApi } from '../../../api/PessoaApi';
 import { formatCpf } from '../../../utils/utils';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayjs from 'dayjs';
+
+dayjs.extend(customParseFormat);
 
 
 export default function PessoaTable() {
@@ -32,25 +35,30 @@ export default function PessoaTable() {
     {
       title: 'Nome',
       dataIndex: 'nome',
+      key: 'nome',
     },
     {
       title: 'Nascimento',
       dataIndex: 'nascimento',
-      render: (value) => dayjs(value).format('DD/MM/YYYY'),
+      render: (value) => value,
+      key: 'nascimento',
     },
     {
       title: 'CPF',
       dataIndex: 'cpf',
       render: (cpf) => formatCpf(cpf),
+      key: 'cpf',
     },
     {
       title: 'Cidade',
       render: (_, record) => `${record.endereco.cidade} / ${record.endereco.estado}`,
+      key: 'cidade',
     },
     {
       title: 'Situação da Integração',
       dataIndex: 'status',
-      render: (status: SituacaoIntegracaoKey) => SituacaoIntegracao[status],
+      render: (status) => status as SituacaoIntegracaoValue,
+      key: 'status',
     },
     {
       title: 'Ação',
@@ -64,7 +72,7 @@ export default function PessoaTable() {
             />
           </Tooltip>
 
-          {(record.status === 'PENDENTE' || record.status === 'ERRO') && (
+          {(record.status === SituacaoIntegracao.PENDENTE || record.status === SituacaoIntegracao.ERRO) && (
             <Tooltip title="Reintegrar">
               <Button
                 icon={<SyncOutlined />}
@@ -97,7 +105,7 @@ export default function PessoaTable() {
   return (
     <Card title="Pessoas Cadastradas" className="w-full mt-4">
       <Table
-        rowKey="id"
+        rowKey="cpf"
         dataSource={pessoas}
         columns={columns}
         pagination={false}
