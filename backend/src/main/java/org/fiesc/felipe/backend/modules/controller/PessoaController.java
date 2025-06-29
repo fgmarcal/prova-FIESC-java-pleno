@@ -3,6 +3,7 @@ package org.fiesc.felipe.backend.modules.controller;
 import lombok.RequiredArgsConstructor;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaResponseDto;
+import org.fiesc.felipe.backend.modules.model.dto.ResponseDto;
 import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +44,8 @@ public class PessoaController {
     }
 
     @PostMapping("/integrar/{cpf}")
-    public ResponseEntity<Void> reenviarIntegracao(@PathVariable String cpf) {
-        pessoaService.reenviarIntegracao(cpf);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResponseDto> reenviarIntegracao(@PathVariable String cpf) {
+        var response = pessoaService.reenviarIntegracao(cpf);
+        return ResponseEntity.ok(response);
     }
 }

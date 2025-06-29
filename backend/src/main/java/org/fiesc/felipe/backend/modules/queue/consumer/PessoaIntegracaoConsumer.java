@@ -3,7 +3,6 @@ package org.fiesc.felipe.backend.modules.queue.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
-import org.fiesc.felipe.backend.modules.queue.producer.PessoaIntegracaoProducer;
 import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

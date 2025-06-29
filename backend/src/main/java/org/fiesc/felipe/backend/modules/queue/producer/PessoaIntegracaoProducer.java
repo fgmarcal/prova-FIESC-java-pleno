@@ -17,12 +17,11 @@ public class PessoaIntegracaoProducer {
 
     public void enviarPessoaParaFila(PessoaRequestDto dto) {
         log.info("Enviando pessoa para fila: {}", dto);
-
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ROUTING_KEY, dto);
     }
 
     public void enviarStatus(PessoaIntegracaoStatusDto statusDto) {
         log.info("Enviando status: {}", statusDto);
-        rabbitTemplate.convertAndSend("pessoa.exchange", "pessoa.status.retorno", statusDto);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.RETORNO_ROUTING_KEY, statusDto);
     }
 }

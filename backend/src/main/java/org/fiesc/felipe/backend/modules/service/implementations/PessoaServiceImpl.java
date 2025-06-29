@@ -2,6 +2,7 @@ package org.fiesc.felipe.backend.modules.service.implementations;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.fiesc.felipe.backend.modules.exceptions.NotFoundException;
 import org.fiesc.felipe.backend.modules.model.dto.*;
 import org.fiesc.felipe.backend.modules.model.entity.Pessoa;
 import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
@@ -13,7 +14,6 @@ import org.fiesc.felipe.backend.modules.service.interfaces.PessoaService;
 import org.fiesc.felipe.backend.modules.service.external.CorreiosIntegrationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -117,9 +117,9 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public void reenviarIntegracao(String cpf) {
+    public ResponseDto reenviarIntegracao(String cpf) {
         Pessoa pessoa = pessoaRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
 
         String situacao = pessoa.getSituacaoIntegracao();
         if (!situacao.equals(SituacaoIntegracao.PENDENTE.toString()) &&
@@ -134,17 +134,19 @@ public class PessoaServiceImpl implements PessoaService {
 
         this.integrarPessoa(dto);
         log.info("Integração reenviada manualmente para CPF {}", cpf);
+        return new ResponseDto("Pessoa enviada para integração com sucesso");
     }
 
     @Override
     @Transactional
-    public void integrarPessoa(PessoaRequestDto dto) {
+    public ResponseDto integrarPessoa(PessoaRequestDto dto) {
         try {
             pessoaApiClient.atualizarPessoa(dto.cpf(), dto);
             atualizarSituacao(dto.cpf(), SituacaoIntegracao.SUCESSO.toString());
             pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
                     dto.cpf(), SituacaoIntegracao.SUCESSO.toString(), "Pessoa atualizada com sucesso"
             ));
+            return new ResponseDto("Pessoa enviada para atualização com sucesso");
         } catch (RuntimeException e) {
             try {
                 pessoaApiClient.criarPessoa(dto);
@@ -152,6 +154,7 @@ public class PessoaServiceImpl implements PessoaService {
                 pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
                         dto.cpf(), SituacaoIntegracao.SUCESSO.toString(), "Pessoa cadastrada com sucesso"
                 ));
+                return new ResponseDto("Pessoa enviada para criação com sucesso");
             } catch (Exception ex) {
                 atualizarSituacao(dto.cpf(), SituacaoIntegracao.ERRO.toString());
                 pessoaIntegracaoProducer.enviarStatus(new PessoaIntegracaoStatusDto(
@@ -164,6 +167,7 @@ public class PessoaServiceImpl implements PessoaService {
                     dto.cpf(), SituacaoIntegracao.ERRO.toString(), "Erro ao atualizar pessoa: " + ex.getMessage()
             ));
         }
+        return null;
     }
 
     private void atualizarSituacao(String cpf, String situacao) {

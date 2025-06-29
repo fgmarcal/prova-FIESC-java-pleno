@@ -2,6 +2,7 @@ package org.fiesc.felipe.backend.modules.service.interfaces;
 
 import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaResponseDto;
+import org.fiesc.felipe.backend.modules.model.dto.ResponseDto;
 
 import java.util.List;
 
@@ -11,6 +12,6 @@ public interface PessoaService {
     void remover(String cpf);
     List<PessoaRequestDto> listarTodos();
     PessoaRequestDto consultarPorCpf(String cpf);
-    void reenviarIntegracao(String cpf);
-    void integrarPessoa(PessoaRequestDto dto);
+    ResponseDto reenviarIntegracao(String cpf);
+    ResponseDto integrarPessoa(PessoaRequestDto dto);
 }

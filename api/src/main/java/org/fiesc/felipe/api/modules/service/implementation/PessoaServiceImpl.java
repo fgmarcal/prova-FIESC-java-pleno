@@ -2,6 +2,7 @@ package org.fiesc.felipe.api.modules.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
@@ -26,9 +27,12 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public void salvarPessoa(PessoaRequestDto dto) {
+    public void criarPessoa(PessoaRequestDto dto) {
         if (dto == null || dto.cpf() == null) {
             throw new RuntimeException("CPF da pessoa é obrigatório ou objeto inválido");
+        }
+        if (existePorCpf(dto.cpf())) {
+            throw new RuntimeException("Pessoa já existe");
         }
         validarCamposObrigatorios(dto);
 
@@ -55,9 +59,9 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public void atualizarPessoa(PessoaRequestDto dto) {
+    public void atualizarPessoa(PessoaRequestDto dto) throws NotFoundException {
         Pessoa pessoa = pessoaRepository.findByCpf(dto.cpf())
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
 
         validarCamposObrigatorios(dto);
 
@@ -91,24 +95,23 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public PessoaRequestDto consultarPorCpf(String cpf) {
+    public PessoaRequestDto consultarPorCpf(String cpf) throws NotFoundException {
         Pessoa pessoa = pessoaRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
         return mapToDto(pessoa);
     }
 
     @Override
     @Transactional
-    public PessoaResponseDto removerPorCpf(String cpf) {
+    public PessoaResponseDto removerPorCpf(String cpf) throws NotFoundException {
         Pessoa pessoa = pessoaRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+                .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
 
         pessoaRepository.delete(pessoa);
         return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa removida com sucesso");
     }
 
-    @Override
-    public boolean existePorCpf(String cpf) {
+    private boolean existePorCpf(String cpf) {
         return pessoaRepository.findByCpf(cpf).isPresent();
     }
 
