@@ -1,4 +1,4 @@
-package org.fiesc.felipe.api.modules.model.dto;
+package org.fiesc.felipe.api.modules.shared.dto;
 
 import java.io.Serializable;
 

@@ -1,17 +1,17 @@
-package org.fiesc.felipe.api.modules.service.implementation;
+package org.fiesc.felipe.api.modules.domain.service.implementation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
-import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
-import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
-import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
-import org.fiesc.felipe.api.modules.model.dto.ResponseDto;
-import org.fiesc.felipe.api.modules.model.entity.Endereco;
-import org.fiesc.felipe.api.modules.model.entity.Pessoa;
-import org.fiesc.felipe.api.modules.repository.PessoaRepository;
-import org.fiesc.felipe.api.modules.service.external.CorreiosIntegrationService;
-import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
+import org.fiesc.felipe.api.modules.shared.exceptions.NotFoundException;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaRequestDto;
+import org.fiesc.felipe.api.modules.shared.dto.EnderecoDto;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaResponseDto;
+import org.fiesc.felipe.api.modules.shared.dto.ResponseDto;
+import org.fiesc.felipe.api.modules.domain.entity.Endereco;
+import org.fiesc.felipe.api.modules.domain.entity.Pessoa;
+import org.fiesc.felipe.api.modules.infrastructure.repository.PessoaRepository;
+import org.fiesc.felipe.api.modules.infrastructure.external.CorreiosIntegrationService;
+import org.fiesc.felipe.api.modules.domain.service.interfaces.PessoaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

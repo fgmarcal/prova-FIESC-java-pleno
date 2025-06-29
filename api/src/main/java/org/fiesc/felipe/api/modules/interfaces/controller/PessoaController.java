@@ -1,11 +1,11 @@
-package org.fiesc.felipe.api.modules.controller;
+package org.fiesc.felipe.api.modules.interfaces.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
-import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
-import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
-import org.fiesc.felipe.api.modules.model.dto.ResponseDto;
-import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
+import org.fiesc.felipe.api.modules.shared.exceptions.NotFoundException;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaRequestDto;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaResponseDto;
+import org.fiesc.felipe.api.modules.shared.dto.ResponseDto;
+import org.fiesc.felipe.api.modules.domain.service.interfaces.PessoaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

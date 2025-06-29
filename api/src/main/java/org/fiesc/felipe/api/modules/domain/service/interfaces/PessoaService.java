@@ -1,9 +1,9 @@
-package org.fiesc.felipe.api.modules.service.interfaces;
+package org.fiesc.felipe.api.modules.domain.service.interfaces;
 
-import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
-import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
-import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
-import org.fiesc.felipe.api.modules.model.dto.ResponseDto;
+import org.fiesc.felipe.api.modules.shared.exceptions.NotFoundException;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaRequestDto;
+import org.fiesc.felipe.api.modules.shared.dto.PessoaResponseDto;
+import org.fiesc.felipe.api.modules.shared.dto.ResponseDto;
 
 import java.util.List;
 

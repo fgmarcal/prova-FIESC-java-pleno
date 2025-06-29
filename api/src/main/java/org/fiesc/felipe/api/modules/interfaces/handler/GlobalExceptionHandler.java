@@ -1,8 +1,8 @@
-package org.fiesc.felipe.api.modules.handler;
+package org.fiesc.felipe.api.modules.interfaces.handler;
 
 
 import jakarta.validation.ConstraintViolationException;
-import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
+import org.fiesc.felipe.api.modules.shared.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

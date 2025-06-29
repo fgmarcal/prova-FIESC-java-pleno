@@ -1,4 +1,4 @@
-package org.fiesc.felipe.api.modules.model.enums;
+package org.fiesc.felipe.api.modules.shared.enums;
 
 public enum SituacaoIntegracao {
     NAO_ENVIADO("Não enviado"),

@@ -1,7 +1,7 @@
-package org.fiesc.felipe.api.modules.service.external;
+package org.fiesc.felipe.api.modules.infrastructure.external;
 
 import lombok.extern.slf4j.Slf4j;
-import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
+import org.fiesc.felipe.api.modules.shared.dto.EnderecoDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;

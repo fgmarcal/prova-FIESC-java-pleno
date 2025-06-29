@@ -1,4 +1,4 @@
-package org.fiesc.felipe.api.modules.exceptions;
+package org.fiesc.felipe.api.modules.shared.exceptions;
 
 public class NotFoundException extends Exception {
 

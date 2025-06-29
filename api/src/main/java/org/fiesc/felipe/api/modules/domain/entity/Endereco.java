@@ -1,4 +1,4 @@
-package org.fiesc.felipe.api.modules.model.entity;
+package org.fiesc.felipe.api.modules.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
