@@ -1,16 +1,17 @@
 package org.fiesc.felipe.backend.modules.service;
 
-import org.fiesc.felipe.backend.modules.exceptions.NotFoundException;
+import org.fiesc.felipe.backend.modules.shared.exceptions.NotFoundException;
 import org.fiesc.felipe.backend.modules.model.dto.*;
-import org.fiesc.felipe.backend.modules.model.entity.Endereco;
-import org.fiesc.felipe.backend.modules.model.entity.Pessoa;
-import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
-import org.fiesc.felipe.backend.modules.queue.producer.PessoaIntegracaoProducer;
-import org.fiesc.felipe.backend.modules.repository.PessoaRepository;
-import org.fiesc.felipe.backend.modules.service.external.CorreiosIntegrationService;
-import org.fiesc.felipe.backend.modules.service.external.PessoaApiClient;
-import org.fiesc.felipe.backend.modules.service.implementations.PessoaServiceImpl;
-import org.fiesc.felipe.backend.modules.service.interfaces.EnderecoService;
+import org.fiesc.felipe.backend.modules.domain.entity.Endereco;
+import org.fiesc.felipe.backend.modules.domain.entity.Pessoa;
+import org.fiesc.felipe.backend.modules.shared.enums.SituacaoIntegracao;
+import org.fiesc.felipe.backend.modules.infrastructure.queue.producer.PessoaIntegracaoProducer;
+import org.fiesc.felipe.backend.modules.infrastructure.repository.PessoaRepository;
+import org.fiesc.felipe.backend.modules.infrastructure.external.CorreiosIntegrationService;
+import org.fiesc.felipe.backend.modules.infrastructure.external.PessoaApiClient;
+import org.fiesc.felipe.backend.modules.domain.service.implementations.PessoaServiceImpl;
+import org.fiesc.felipe.backend.modules.domain.service.interfaces.EnderecoService;
+import org.fiesc.felipe.backend.modules.shared.dto.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
