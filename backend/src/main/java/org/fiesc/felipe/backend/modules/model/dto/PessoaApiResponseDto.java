@@ -1,8 +1,8 @@
-package org.fiesc.felipe.api.modules.model.dto;
+package org.fiesc.felipe.backend.modules.model.dto;
 
 import java.io.Serializable;
 
-public record PessoaResponseDto(
+public record PessoaApiResponseDto(
         String nome,
         String cpf,
         String nascimento,

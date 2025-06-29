@@ -28,7 +28,8 @@ public class Pessoa {
     @Email
     private String email;
 
-    @OneToOne(mappedBy = "pessoa", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "id_endereco")
     private Endereco endereco;
 
     @Column(name = "situacao_integracao", nullable = false)

@@ -14,8 +14,7 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "id_pessoa")
+    @OneToOne(mappedBy = "endereco")
     private Pessoa pessoa;
 
     private String cep;

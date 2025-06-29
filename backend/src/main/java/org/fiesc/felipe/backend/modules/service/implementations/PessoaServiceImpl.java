@@ -30,6 +30,8 @@ public class PessoaServiceImpl implements PessoaService {
     private final CorreiosIntegrationService correiosService;
     private final PessoaIntegracaoProducer pessoaIntegracaoProducer;
     private final PessoaApiClient pessoaApiClient;
+    private static final DateTimeFormatter FORMATADOR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
 
     @Override
     @Transactional
@@ -95,24 +97,27 @@ public class PessoaServiceImpl implements PessoaService {
         return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa atualizada com sucesso");
     }
 
+    @Transactional
     @Override
     public void remover(String cpf) {
         try {
-            pessoaApiClient.removerPessoa(cpf);
-            pessoaRepository.deleteByCpf(cpf);
+            var response = pessoaApiClient.removerPessoa(cpf);
+            if(response != null){
+               pessoaRepository.deleteByCpf(cpf);
+            }
         } catch (Exception e) {
-            log.error("Erro ao remover CPF {} na API", cpf, e.getStackTrace());
+            log.error("Erro ao remover CPF {} na API: {}", cpf, e.getMessage(), e);
             throw new RuntimeException("Erro ao remover pessoa na API: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public List<PessoaRequestDto> listarTodos() {
+    public List<PessoaApiResponseDto> listarTodos() {
         return pessoaApiClient.listarTodas();
     }
 
     @Override
-    public PessoaRequestDto consultarPorCpf(String cpf) {
+    public PessoaApiResponseDto consultarPorCpf(String cpf) {
         return pessoaApiClient.consultarPessoaPorCpf(cpf);
     }
 
@@ -185,12 +190,11 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     private void preencherDadosPessoa(Pessoa pessoa, PessoaRequestDto dto) {
-        DateTimeFormatter FORMATADOR_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         pessoa.setNome(capitalizeNome(dto.nome()));
         pessoa.setCpf(dto.cpf());
         pessoa.setEmail(dto.email());
-        if (dto.dataNascimento() != null && !dto.dataNascimento().isBlank()) {
-            pessoa.setNascimento(LocalDate.parse(dto.dataNascimento(), FORMATADOR_DATA));
+        if (dto.nascimento() != null && !dto.nascimento().isBlank()) {
+            pessoa.setNascimento(LocalDate.parse(dto.nascimento(), FORMATADOR));
         }
     }
 
@@ -211,7 +215,7 @@ public class PessoaServiceImpl implements PessoaService {
 
         return new PessoaRequestDto(
                 pessoa.getNome(),
-                pessoa.getNascimento() != null ? pessoa.getNascimento().toString() : null,
+                pessoa.getNascimento() != null ? pessoa.getNascimento().format(FORMATADOR) : null,
                 pessoa.getCpf(),
                 pessoa.getEmail(),
                 enderecoDto

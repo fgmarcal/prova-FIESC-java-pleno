@@ -6,6 +6,7 @@ import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.EnderecoDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
+import org.fiesc.felipe.api.modules.model.dto.ResponseDto;
 import org.fiesc.felipe.api.modules.model.entity.Endereco;
 import org.fiesc.felipe.api.modules.model.entity.Pessoa;
 import org.fiesc.felipe.api.modules.repository.PessoaRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +26,8 @@ public class PessoaServiceImpl implements PessoaService {
 
     private final PessoaRepository pessoaRepository;
     private final CorreiosIntegrationService correiosIntegrationService;
+    private static final DateTimeFormatter FORMATADOR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
 
     @Override
     @Transactional
@@ -90,12 +94,12 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public List<PessoaRequestDto> listarTodos() {
+    public List<PessoaResponseDto> listarTodos() {
         return pessoaRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
-    public PessoaRequestDto consultarPorCpf(String cpf) throws NotFoundException {
+    public PessoaResponseDto consultarPorCpf(String cpf) throws NotFoundException {
         Pessoa pessoa = pessoaRepository.findByCpf(cpf)
                 .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
         return mapToDto(pessoa);
@@ -103,12 +107,12 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public PessoaResponseDto removerPorCpf(String cpf) throws NotFoundException {
+    public ResponseDto removerPorCpf(String cpf) throws NotFoundException {
         Pessoa pessoa = pessoaRepository.findByCpf(cpf)
                 .orElseThrow(() -> new NotFoundException("Pessoa não encontrada"));
 
         pessoaRepository.delete(pessoa);
-        return new PessoaResponseDto(pessoa.getIdPessoa(), "Pessoa removida com sucesso");
+        return new ResponseDto(pessoa.getIdPessoa(), "Pessoa removida com sucesso");
     }
 
     private boolean existePorCpf(String cpf) {
@@ -116,11 +120,11 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
 
-    private PessoaRequestDto mapToDto(Pessoa pessoa) {
+    private PessoaResponseDto mapToDto(Pessoa pessoa) {
         Endereco endereco = pessoa.getEndereco();
-        return new PessoaRequestDto(
+        return new PessoaResponseDto(
                 pessoa.getNome(),
-                pessoa.getNascimento() != null ? pessoa.getNascimento().toString() : null,
+                pessoa.getNascimento() != null ? pessoa.getNascimento().format(FORMATADOR) : null,
                 pessoa.getCpf(),
                 pessoa.getEmail(),
                 new EnderecoDto(
@@ -129,12 +133,16 @@ public class PessoaServiceImpl implements PessoaService {
                         endereco.getNumero(),
                         endereco.getCidade(),
                         endereco.getEstado()
-                )
+                ),
+                pessoa.getDataHoraInclusaoRegistro() != null ? pessoa.getDataHoraInclusaoRegistro().toString() : null,
+                pessoa.getDataHoraUltimaAlteracaoRegistro() != null ? pessoa.getDataHoraUltimaAlteracaoRegistro().toString() : null
         );
     }
 
     private void validarDataNascimento(PessoaRequestDto dto, Pessoa pessoa) {
-        LocalDate nascimento = LocalDate.parse(dto.dataNascimento());
+        DateTimeFormatter FORMATADOR_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        LocalDate nascimento = LocalDate.parse(dto.nascimento(), FORMATADOR_DATA);
         if (nascimento.isAfter(LocalDate.now())) {
             throw new RuntimeException("Data de nascimento não pode ser futura");
         }
@@ -151,7 +159,7 @@ public class PessoaServiceImpl implements PessoaService {
 
     private void validarCamposObrigatorios(PessoaRequestDto dto) {
         if (dto.nome() == null || dto.nome().isBlank() ||
-                dto.cpf() == null || dto.email() == null || dto.dataNascimento() == null ||
+                dto.cpf() == null || dto.email() == null || dto.nascimento() == null ||
                 dto.endereco() == null ||
                 dto.endereco().cep() == null || dto.endereco().rua() == null ||
                 dto.endereco().numero() == null || dto.endereco().cidade() == null || dto.endereco().estado() == null) {

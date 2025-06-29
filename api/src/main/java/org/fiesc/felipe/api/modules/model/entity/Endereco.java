@@ -20,7 +20,6 @@ public class Endereco {
     private String cidade;
     private String estado;
 
-    @OneToOne
-    @JoinColumn(name = "id_pessoa")
+    @OneToOne(mappedBy = "endereco")
     private Pessoa pessoa;
 }

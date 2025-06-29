@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public record PessoaRequestDto(
         String nome,
-        String dataNascimento,
+        String nascimento,
         String cpf,
         String email,
         EnderecoDto endereco

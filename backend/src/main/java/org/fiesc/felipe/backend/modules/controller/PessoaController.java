@@ -1,6 +1,7 @@
 package org.fiesc.felipe.backend.modules.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.fiesc.felipe.backend.modules.model.dto.PessoaApiResponseDto;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.backend.modules.model.dto.PessoaResponseDto;
 import org.fiesc.felipe.backend.modules.model.dto.ResponseDto;
@@ -28,12 +29,12 @@ public class PessoaController {
     }
 
     @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<PessoaRequestDto> buscarPorCpf(@PathVariable String cpf) {
+    public ResponseEntity<PessoaApiResponseDto> buscarPorCpf(@PathVariable String cpf) {
         return ResponseEntity.ok(pessoaService.consultarPorCpf(cpf));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<PessoaRequestDto>> listarTodos() {
+    public ResponseEntity<List<PessoaApiResponseDto>> listarTodos() {
         return ResponseEntity.ok(pessoaService.listarTodos());
     }
 

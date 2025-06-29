@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.fiesc.felipe.api.modules.exceptions.NotFoundException;
 import org.fiesc.felipe.api.modules.model.dto.PessoaRequestDto;
 import org.fiesc.felipe.api.modules.model.dto.PessoaResponseDto;
+import org.fiesc.felipe.api.modules.model.dto.ResponseDto;
 import org.fiesc.felipe.api.modules.service.interfaces.PessoaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,23 +20,23 @@ public class PessoaController {
     private final PessoaService pessoaService;
 
     @PostMapping("/")
-    public ResponseEntity<PessoaResponseDto> criarPessoa(@RequestBody PessoaRequestDto dto) {
+    public ResponseEntity<ResponseDto> criarPessoa(@RequestBody PessoaRequestDto dto) {
         pessoaService.criarPessoa(dto);
-        return ResponseEntity.created(URI.create("/pessoa/cpf/" + dto.cpf())).body(new PessoaResponseDto(null, "Pessoa criada com sucesso"));
+        return ResponseEntity.created(URI.create("/pessoa/cpf/" + dto.cpf())).body(new ResponseDto(null, "Pessoa criada com sucesso"));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<PessoaRequestDto>> listar() {
+    public ResponseEntity<List<PessoaResponseDto>> listar() {
         return ResponseEntity.ok(pessoaService.listarTodos());
     }
 
     @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<PessoaRequestDto> buscarPorCpf(@PathVariable String cpf) throws NotFoundException {
+    public ResponseEntity<PessoaResponseDto> buscarPorCpf(@PathVariable String cpf) throws NotFoundException {
         return ResponseEntity.ok(pessoaService.consultarPorCpf(cpf));
     }
 
     @DeleteMapping("/cpf/{cpf}")
-    public ResponseEntity<PessoaResponseDto> deletarPorCpf(@PathVariable String cpf) throws NotFoundException {
+    public ResponseEntity<ResponseDto> deletarPorCpf(@PathVariable String cpf) throws NotFoundException {
         return ResponseEntity.ok(pessoaService.removerPorCpf(cpf));
     }
 
