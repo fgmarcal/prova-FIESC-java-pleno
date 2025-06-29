@@ -7,7 +7,7 @@ import org.fiesc.felipe.backend.modules.model.dto.ResponseDto;
 import java.util.List;
 
 public interface PessoaService {
-    PessoaResponseDto salvar(PessoaRequestDto dto);
+    PessoaResponseDto criar(PessoaRequestDto dto);
     PessoaResponseDto atualizar(String cpf, PessoaRequestDto dto);
     void remover(String cpf);
     List<PessoaRequestDto> listarTodos();

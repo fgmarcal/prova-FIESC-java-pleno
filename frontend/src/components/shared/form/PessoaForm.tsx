@@ -14,11 +14,14 @@ import {
 import { notifyError, notifySuccess } from '../notifications/notification';
 import { usePessoa } from '../../../context/usePessoa';
 import type { PessoaFormData } from '../../../types/PessoaFormData';
+import type { PessoaRequest } from '../../../types/PessoaRequest';
+import { PessoaApi } from '../../../api/PessoaApi';
   
   export default function PessoaForm() {
     const { pessoaEditando } = usePessoa();
     const [form] = Form.useForm<PessoaFormData>();
     const [loadingCep, setLoadingCep] = useState(false);
+    const [requiredField, setRequiredField] = useState<boolean>(false);
   
     const buscarCep = async () => {
         const cep = form.getFieldValue('cep')?.replace(/\D/g, '');
@@ -42,10 +45,10 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
       };
       
   
-      const onFinish = (values: PessoaFormData) => {
+      const onFinish = async (values: PessoaFormData) => {
         const {
           cep,
-          rua: logradouro,
+          rua,
           nascimento,
           cidade,
           estado,
@@ -53,24 +56,30 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
           ...dadosPessoais
         } = values;
       
-        const nascimentoISO =
-          dayjs.isDayjs(nascimento) ? nascimento.toISOString() : nascimento ?? undefined;
+        const nascimentoFormatado =
+          dayjs.isDayjs(nascimento) ? nascimento.format('DD/MM/YYYY') : nascimento ?? undefined;
 
-        const payload = {
+        const payload:PessoaRequest = {
           ...dadosPessoais,
           cpf: values.cpf?.replace(/\D/g, ''),
-          nascimento: nascimentoISO,
+          nascimento: nascimentoFormatado,
           endereco: {
             cep,
-            rua: logradouro,
+            rua,
             cidade,
             estado,
             numero,
           },
         };
       
-        console.log('Salvar:', payload);
-        notifySuccess('Pessoa salva com sucesso!');
+        try{
+          console.log(payload);
+          await PessoaApi.criar(payload);
+          notifySuccess('Pessoa salva com sucesso!');
+          form.resetFields();
+        }catch(error) {
+          notifyError(error);
+        }          
       };
       
 
@@ -86,6 +95,16 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
         form.resetFields();
       }
     }, [pessoaEditando, form]);
+
+    useEffect(() => {
+      const hasCep = form.getFieldValue('cep')
+      if (hasCep) {
+        setRequiredField(true);
+      }
+      else {
+        setRequiredField(false);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      }}, [form.getFieldValue('cep')]);
   
     return (
       <Card title="Cadastro de Pessoa" className="w-full">
@@ -123,9 +142,26 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
   
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item label="Data nascimento" name="nascimento">
-                <DatePicker format="DD/MM/YYYY" className="w-full" />
-              </Form.Item>
+            <Form.Item
+              label="Data de nascimento"
+              name="nascimento"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    return value.isAfter(dayjs())
+                      ? Promise.reject(new Error('A data não pode ser no futuro'))
+                      : Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <DatePicker
+                format="DD/MM/YYYY"
+                className="w-full"
+                disabledDate={(current) => current && current > dayjs().endOf('day')}
+              />
+            </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
@@ -171,8 +207,8 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
             <Col span={24}>
               <fieldset className="border border-gray-300 p-8 rounded-md relative">
                 <legend className="text-sm font-medium px-2">Endereço</legend>
-                <Row gutter={16} align="middle">
-                  <Col span={8}>
+                <Row gutter={8} align="bottom">
+                  <Col span={6}>
                     <Form.Item
                       label="Cep"
                       name="cep"
@@ -192,27 +228,16 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
                         onClick={buscarCep}
                         loading={loadingCep}
                         icon={<SearchOutlined />}
-                        className="w-full"
+                        type='primary'
                         htmlType="button"
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={14}>
-                    <Form.Item label="Rua" name="rua">
-                      <Input />
-                    </Form.Item>
-                  </Col>
                 </Row>
-  
-                <Row gutter={16}>
+                <Row gutter={16} align="middle">
                   <Col span={18}>
-                    <Form.Item label="Cidade" name="cidade">
-                      <Input />
-                    </Form.Item>
-                  </Col>
-                  <Col span={3}>
-                    <Form.Item label="Estado" name="estado">
-                      <Input />
+                    <Form.Item label="Rua" name="rua" rules={[{required:requiredField}]}>
+                      <Input disabled={loadingCep}/>
                     </Form.Item>
                   </Col>
                   <Col span={3}>
@@ -224,9 +249,23 @@ import type { PessoaFormData } from '../../../types/PessoaFormData';
                           pattern: /^\d+$/,
                           message: 'Apenas números',
                         },
+                        {required:requiredField}
                       ]}
                     >
-                      <Input type="number" />
+                      <Input type="default" disabled={loadingCep} />
+                    </Form.Item>
+                  </Col>
+                </Row>
+  
+                <Row gutter={16}>
+                  <Col span={18}>
+                    <Form.Item label="Cidade" name="cidade" rules={[{required:requiredField}]}>
+                      <Input disabled={loadingCep}/>
+                    </Form.Item>
+                  </Col>
+                  <Col span={3}>
+                    <Form.Item label="Estado" name="estado" rules={[{required:requiredField}]}>
+                      <Input disabled={loadingCep}/>
                     </Form.Item>
                   </Col>
                 </Row>

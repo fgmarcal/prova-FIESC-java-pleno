@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     @Transactional
-    public PessoaResponseDto salvar(PessoaRequestDto dto) {
+    public PessoaResponseDto criar(PessoaRequestDto dto) {
         validarNome(dto.nome());
 
         if (dto.cpf() != null && pessoaRepository.existsByCpf(dto.cpf())) {
@@ -184,11 +185,12 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     private void preencherDadosPessoa(Pessoa pessoa, PessoaRequestDto dto) {
+        DateTimeFormatter FORMATADOR_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         pessoa.setNome(capitalizeNome(dto.nome()));
         pessoa.setCpf(dto.cpf());
         pessoa.setEmail(dto.email());
-        if (dto.dataNascimento() != null) {
-            pessoa.setNascimento(LocalDate.parse(dto.dataNascimento()));
+        if (dto.dataNascimento() != null && !dto.dataNascimento().isBlank()) {
+            pessoa.setNascimento(LocalDate.parse(dto.dataNascimento(), FORMATADOR_DATA));
         }
     }
 

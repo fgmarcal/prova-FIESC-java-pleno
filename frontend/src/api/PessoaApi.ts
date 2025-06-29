@@ -1,6 +1,8 @@
-import type { Pessoa } from "../types/Pessoa";
+import type { PessoaRequest } from "../types/PessoaRequest";
 import { endpoints } from "../config/endpoints";
 import { api } from "../config/axiosInstance";
+import type { Pessoa } from "../entities/Pessoa";
+import type { ApiResponse } from "../types/Response";
 
 export class PessoaApi {
 
@@ -14,13 +16,13 @@ export class PessoaApi {
         return data;
     }
 
-    static async criar(pessoa: Pessoa): Promise<Pessoa> {
-        const {data} = await api.post<Pessoa>(endpoints.pessoa.criar(), pessoa);
+    static async criar(pessoa: PessoaRequest): Promise<ApiResponse> {
+        const {data} = await api.post<ApiResponse>(endpoints.pessoa.criar(), pessoa);
         return data;
     }
 
-    static async atualizar(cpf: string, pessoa: Pessoa): Promise<Pessoa> {
-        const {data} = await api.put<Pessoa>(endpoints.pessoa.atualizar(cpf), pessoa);
+    static async atualizar(cpf: string, pessoa: PessoaRequest): Promise<ApiResponse> {
+        const {data} = await api.put<ApiResponse>(endpoints.pessoa.atualizar(cpf), pessoa);
         return data;
     }
 
@@ -28,8 +30,8 @@ export class PessoaApi {
         await api.delete(endpoints.pessoa.excluir(cpf));
     }
 
-    static async reintegrar(cpf: string): Promise<Pessoa> {
-        const {data} = await api.post<Pessoa>(endpoints.pessoa.reintegrar(cpf));
+    static async reintegrar(cpf: string): Promise<ApiResponse> {
+        const {data} = await api.post<ApiResponse>(endpoints.pessoa.reintegrar(cpf));
         return data;
     }
 }

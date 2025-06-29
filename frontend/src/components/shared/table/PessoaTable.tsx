@@ -4,12 +4,11 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useMemo } from 'react';
 import { SituacaoIntegracao, type SituacaoIntegracaoKey } from '../../../config/integrationStatus';
-import type { Pessoa } from '../../../types/Pessoa';
 import { usePessoa } from '../../../context/usePessoa';
+import type { Pessoa } from '../../../entities/Pessoa';
 
 const mockData: Pessoa[] = [
   {
-    id: '1',
     nome: 'Fulano da Silva',
     nascimento: '1999-01-01',
     cpf: '00011122233',
@@ -23,7 +22,6 @@ const mockData: Pessoa[] = [
     status: 'PENDENTE',
   },
   {
-    id: '2',
     nome: 'Ciclano de Souza',
     nascimento: '1999-01-01',
     cpf: '11111111111',
@@ -37,7 +35,6 @@ const mockData: Pessoa[] = [
     status: 'SUCESSO',
   },
   {
-    id: '3',
     nome: 'Beltrano Medeiros',
     nascimento: '1999-01-01',
     cpf: '99988844444',
@@ -51,7 +48,6 @@ const mockData: Pessoa[] = [
     status: 'ERRO',
   },
   {
-    id: '4',
     nome: 'Beltrano Medeiros',
     nascimento: '1999-01-01',
     cpf: '99988844444',
@@ -143,7 +139,7 @@ export default function PessoaTable() {
         </Space>
       ),
     },
-  ], []);
+  ], [setPessoaEditando]);
 
   return (
     <Card title="Pessoas Cadastradas" className="w-full mt-4">

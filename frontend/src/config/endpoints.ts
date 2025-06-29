@@ -10,7 +10,7 @@ export const endpoints = {
     pessoa:{
         listar: () => `${PESSOA}/all`,
         buscarPorCPF: (cpf: string) => `${PESSOA}/cpf/${cpf}`,
-        criar: () => `${PESSOA}/`,
+        criar: () => `${PESSOA}`,
         atualizar: (cpf: string) => `${PESSOA}/cpf/${cpf}`,
         excluir: (cpf: string) => `${PESSOA}/cpf/${cpf}`,
         reintegrar: (cpf: string) => `${PESSOA}/integrar/${cpf}`,

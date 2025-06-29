@@ -3,7 +3,6 @@ package org.fiesc.felipe.backend.modules.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.fiesc.felipe.backend.modules.model.enums.SituacaoIntegracao;
 
 import java.time.LocalDate;
 

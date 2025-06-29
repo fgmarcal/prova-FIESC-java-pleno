@@ -1,6 +1,6 @@
-import type { Pessoa } from "./Pessoa";
+import type { PessoaRequest } from "./PessoaRequest";
 
 export interface PessoaContextData {
-    pessoaEditando: Pessoa | null;
-    setPessoaEditando: (pessoa: Pessoa | null) => void;
+    pessoaEditando: PessoaRequest | null;
+    setPessoaEditando: (pessoa: PessoaRequest | null) => void;
   }

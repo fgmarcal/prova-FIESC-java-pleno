@@ -19,7 +19,7 @@ public class PessoaController {
 
     @PostMapping("")
     public ResponseEntity<PessoaResponseDto> salvar(@RequestBody PessoaRequestDto dto) {
-        return ResponseEntity.ok(pessoaService.salvar(dto));
+        return ResponseEntity.ok(pessoaService.criar(dto));
     }
 
     @PutMapping("/cpf/{cpf}")
