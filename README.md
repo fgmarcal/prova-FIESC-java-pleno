@@ -40,7 +40,7 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 ### Database
 - **Postgres 15**
 
-### Infraestrutura
+### Infraestrutura de Desenvolvimento
 - **Docker**
 
 ## Iniciando o projeto
