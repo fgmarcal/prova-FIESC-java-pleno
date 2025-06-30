@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+
+  api:
+    build:
+      context: ./api
+    container_name: api
+    ports:
+      - "8081:8081"
+    env_file:
+      - ./api/.env
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+    depends_on:
+      - backend
+      - postgres_api
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+    depends_on:
+      - postgres_backend
+      - rabbitmq
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "4173:4173"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # Infrastructure services
+  postgres_backend:
+    image: postgres:15
+    container_name: postgres_backend
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: backend_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - pgdata_backend:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  postgres_api:
+    image: postgres:15
+    container_name: postgres_api
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: api_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - pgdata_api:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app-network
+
+volumes:
+  pgdata_backend:
+  pgdata_api:
+
+networks:
+  app-network:
+    driver: bridge
