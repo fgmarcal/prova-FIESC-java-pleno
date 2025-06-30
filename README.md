@@ -51,29 +51,38 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
  - Pasta *backend*: Dados de desenvolvimento
 
 ```
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/backend_db
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_backend:5432/backend_db
 SPRING_DATASOURCE_USERNAME=user
 SPRING_DATASOURCE_PASSWORD=pass
 SPRING_RABBITMQ_HOST=localhost
 SPRING_RABBITMQ_PORT=5672
 SPRING_RABBITMQ_USERNAME=guest
 SPRING_RABBITMQ_PASSWORD=guest
-API_PESSOA_BASE_URL=http://localhost:8081
-FRONTEND_BASE_URL=http://localhost:5173
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+API_PESSOA_BASE_URL=http://api:8081
+FRONTEND_BASE_URL=http://frontend:4173,http://localhost:4173
 ```
 
  - Pasta *api*: Dados de desenvolvimento
 
 ```
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5434/api_db
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_api:5432/api_db
 SPRING_DATASOURCE_USERNAME=user
 SPRING_DATASOURCE_PASSWORD=pass
 
-BACKEND_ALLOWED_ORIGIN=http://localhost:8080
+BACKEND_ALLOWED_ORIGIN=http://backend:8080
 ```
 
  - Pasta *frontend*: Dados de desenvolvimento
 
 ```
-BASE_URL='http://localhost:8080'
+BASE_URL='http://backend:8080'
 ```
+
+- Inicie o projeto com o comando docker :
+
+```
+[sudo] docker compose -f docker-compose.general.yml -up -d
+```
+
