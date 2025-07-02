@@ -54,7 +54,7 @@ Este projeto foi desenvolvido como parte da prova prática do processo seletivo 
 SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_backend:5432/backend_db
 SPRING_DATASOURCE_USERNAME=user
 SPRING_DATASOURCE_PASSWORD=pass
-SPRING_RABBITMQ_HOST=localhost
+SPRING_RABBITMQ_HOST=rabbitmq
 SPRING_RABBITMQ_PORT=5672
 SPRING_RABBITMQ_USERNAME=guest
 SPRING_RABBITMQ_PASSWORD=guest
@@ -83,6 +83,6 @@ BASE_URL='http://backend:8080'
 - Inicie o projeto com o comando docker :
 
 ```
-[sudo] docker compose -f docker-compose.general.yml -up -d
+[sudo] docker compose -f docker-compose.general.yml up -d
 ```
 
